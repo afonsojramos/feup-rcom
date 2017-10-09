@@ -25,9 +25,8 @@
 
 int main(int argc, char** argv)
 {
-    int fd, c, res;
+    int fd;
     struct termios oldtio,newtio;
-    char buf[255];
 
     if ( (argc < 2) || 
   	    (
@@ -82,10 +81,12 @@ int main(int argc, char** argv)
     printf("New termios structure set\n");
 
 	char ret=llopen(fd);
+	printf("llopen returned %d.\n", ret);
 
+	char* receive;
 
+	llread(fd, receive);
     tcsetattr(fd,TCSANOW,&oldtio);
     close(fd);
-	free(ret);
     return 0;
 }
