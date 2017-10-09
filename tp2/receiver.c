@@ -105,13 +105,8 @@ int main(int argc, char** argv)
 	printf("Wrote %d/5 bytes of UA response.\n", written);
 
 
-  /* 
-    O ciclo WHILE deve ser alterado de modo a respeitar o indicado no guião 
-  */
-
-
-
     tcsetattr(fd,TCSANOW,&oldtio);
     close(fd);
+	free(ret);
     return 0;
 }

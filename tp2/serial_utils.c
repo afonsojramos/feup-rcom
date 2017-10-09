@@ -12,9 +12,8 @@ char* get_cmd(int fd){
 	char c;
 	char* ret = malloc(sizeof(char)*2);
 	int state=0;
-	int STOP;
 	int BCC_OK;
-	while (STOP==0) {       /* loop for input */
+	while (1) {       /* loop for input */
 		int res = read(fd, &c, 1);   /* returns after 1 char has been input */
 		printf("read %x state:%d\n", c, state);
 		char packet_A, packet_C;
