@@ -164,7 +164,7 @@ int prepareI(char * data, int size, char C){
   }
   stuffing(I, &countS, bcc2, size);
   I[5 + size + countS] = FLAG;
-  return 5 + size + countS;
+  return 5 + size + countS + 1;
 
 }
 
@@ -175,7 +175,7 @@ int prepareI(char * data, int size, char C){
 */
 int llwrite(int receiver, char * data, int size){
   int sizeToWrite = prepareI(data, size, CurrentC);//loads the data into global I
-  for(int i = 0; i <= sizeToWrite; i++){
+  for(int i = 0; i < sizeToWrite; i++){
     printf("%X,", I[i]);
   }
   int written = write(receiver, I, sizeToWrite);
