@@ -26,10 +26,10 @@ unsigned char SET[5];
 unsigned char UA[5];
 
 int attempts = 0;//llopen, llwrite attempt count
-int DONE = FALSE;
+int DONE;
 int receiver;
-char * I;//trama de informacao a enviar
-
+unsigned char * I;//trama de informacao a enviar
+char CurrentC = C_S0;//the first C sent is C_S0, it will then change on each iteration
 
 void prepareSet(){ //prepare message to send
   SET[0] = FLAG;
@@ -48,6 +48,7 @@ void prepareUA(){ //prepare message to receive, test agains the one the receiver
 
 //send packet, implementing attempts and timeouts
 void sendSET(){
+  DONE = FALSE;
   if(attempts == 3){
     printf("Failed 3 times, exiting...\n");
     exit(-1);
@@ -132,12 +133,22 @@ void llopen(int r){
   sendSET();
   printf("Set has been sent\n");
   receiveUA(receiver);
-  printf("Received UA\n");
 }
 
+void stuffing(unsigned char * data, int * countS, char byte, int i){
+  if(byte == FLAG){//do byte stuffing
+    data[4 + i + (*countS)] = FLAG_R1;
+    data[4 + i + (++(*countS))] = FLAG_R2;
+  }else if(byte == FLAG_R1){//do byte stuffing
+    data[4 + i + (*countS)] = FLAG_R1;
+    data[4 + i + (++(*countS))] = FLAG_R3;
+  }else{
+    data[4 + i + (*countS)] = byte;
+  }
+}
 
-void prepareI(char * data, int size, char C){
-  I = malloc(sizeof(char)*(4 + (size * 2) + 2));//[F|A|C|Bcc1|...Data...|Bcc2|F]
+int prepareI(char * data, int size, char C){
+  I = malloc(sizeof(unsigned char)*(4 + (size * 2) + 2));//[F|A|C|Bcc1|...Data...|Bcc2|F]
   I[0] = FLAG;
   I[1] = A;
   I[2] = C;
@@ -147,28 +158,27 @@ void prepareI(char * data, int size, char C){
   I[4] = data[0];
   int countS = 0;//count stuffings
   for(int i = 1; i < size; i++){//iterate data, construct I and calculate Bcc2 simultaneously
-    if(data[i] == FLAG){//do byte stuffing
-      I[4 + i + countS] = FLAG_R1;
-      I[4 + i + (++countS)] = FLAG_R2;
-    }else if(data[i] == FLAG_R1){//do byte stuffing
-      I[4 + i + countS++] = FLAG_R1;
-      I[4 + i + countS] = FLAG_R3;
-    }else{
-      I[4 + i + countS] = data[i];
-    }
+    stuffing(I, &countS, data[i], i);
+    //I[4 + i + (countS)] = data[i];
     bcc2 = bcc2 ^ data[i];
   }
-  //TODO: check if Bcc2 is not flag
-  I[4 + size + countS] = bcc2;
+  stuffing(I, &countS, bcc2, size);
   I[5 + size + countS] = FLAG;
-
+  return 5 + size + countS;
 
 }
 
 /**
 * sends a packet of bytes to the receiver, implementing timeouts
 * @param receiver a file descriptor for the receiver, already open
+* @return -1 if fails or number of bytes written otherwise
 */
-void llwrite(int receiver, char * data, int size){
-  prepareI(data, size, C_S0);
+int llwrite(int receiver, char * data, int size){
+  int sizeToWrite = prepareI(data, size, CurrentC);//loads the data into global I
+  for(int i = 0; i <= sizeToWrite; i++){
+    printf("%X,", I[i]);
+  }
+  int written = write(receiver, I, sizeToWrite);
+  printf("\nwritten:%d\n", written);
+  return -1;
 }

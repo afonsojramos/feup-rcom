@@ -77,6 +77,8 @@ int main(int argc, char** argv){
     printf("New termios structure set\n");
 
     llopen(fd);
+    char * data = "123~56}89";
+    llwrite(fd, data, 10);
 
     tcsetattr(fd,TCSANOW,&oldtio);
     close(fd);
