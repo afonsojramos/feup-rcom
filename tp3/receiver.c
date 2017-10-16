@@ -83,7 +83,7 @@ int main(int argc, char** argv)
 	char ret=llopen(fd);
 	printf("llopen returned %d.\n", ret);
 
-	char* receive;
+	char* receive=NULL;
 
 	llread(fd, receive);
     tcsetattr(fd,TCSANOW,&oldtio);
