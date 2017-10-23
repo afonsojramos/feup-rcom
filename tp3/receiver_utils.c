@@ -33,7 +33,6 @@ int destuff(char* str, unsigned int n){
 
 	int i,j;
 	for(i=0;i<n;i++){
-		printf("c: %c, x: %x\n", str[i], str[i]);	
 		if(str[i]==FLAG_R1){
 			if (str[i+1]==FLAG_R2){ // replace with 0x7e
 				str[i]=FLAG;
@@ -50,7 +49,7 @@ int destuff(char* str, unsigned int n){
 				n--;
 			}else{
 				fprintf(stderr, "I got an unrecognized escape seq. Exiting...\n");
-				assert(0); // we got an unrecognized escape seq. in a VALID packet.
+				assert(0); // we got an unrecognized escape seq. // TODO Send REJ
 			}
 		}
 	}
@@ -142,7 +141,7 @@ char llopen(int fd){
 
 
 int llread(int fd, char* dest){
-	printf("Enetered llread.\n");
+	printf("Entered llread.\n");
 	int rsf=0; // (bytes) read so far
 	int cbs=100; // current buffern size
 
@@ -151,15 +150,14 @@ int llread(int fd, char* dest){
 	if(dest==NULL){
 		perror("malloc");
 	}
-	printf("malloc'ed\n");
 	/* Begin state machine */
 	char c;
 	int state=0;
 	int BCC_OK, STOP=0;
 	while (STOP==0) {       /* loop for input */
-		printf("waiting for input...\n");
+		//printf("waiting for input...\n");
 		read(fd, &c, 1);   /* returns after 1 char has been input */
-		printf("read %x state:%d\n", c, state);
+		//printf("read %x state:%d\n", c, state);
 		char packet_A, packet_C;
 		switch (state){
 			case 0:
@@ -217,7 +215,23 @@ int llread(int fd, char* dest){
 	// having read the whole datagram, ne now need to destuff it.
 
 	int n = destuff(dest, rsf);
-	
+
+	// Time to check our BCC2
+	int i;
+	unsigned char BCC2=0x00;
+
+	for(i=0; i<n-1;i++){ // until n-2 because n	-1 is the BCC2 itself.
+		BCC2^=dest[i];
+	}
+	//printf("%x==%x?\n\n", BCC2, dest[n-1]);
+	if(BCC2 != dest[n-1]){
+		//BCC2 check failed!
+		// TODO Send REJ
+	}else{
+		// Getting this frame was an absolute success! Acknowledging!
+
+		// TODO send RR
+	}
 	printB(dest, n);
 	
 	return 0;	
