@@ -8,24 +8,13 @@
 #include <unistd.h>
 #include <signal.h>
 
-#define FALSE 0
-#define TRUE 1
-//llopen defines
-#define FLAG 0x7E
-#define FLAG_R1 0x7D
-#define FLAG_R2 0x5E
-#define FLAG_R3 0x5D
-#define A 0x03
-#define C_SET 0x03
-#define C_UA 0x07
-#define C_S0 0x00
-#define C_S1 0x40
-
+unsigned char * packetToSend;//used for the alarm function
+int LENGTH;
 
 unsigned char SET[5];
 unsigned char UA[5];
 
-int attempts = 0;//llopen, llwrite attempt count
+int attempts = 0;
 int DONE;
 int receiver;
 unsigned char * I;//trama de informacao a enviar
@@ -46,17 +35,21 @@ void prepareUA(){ //prepare message to receive, test agains the one the receiver
   UA[4] = FLAG;
 }
 
-//send packet, implementing attempts and timeouts
-void sendSET(){
+
+/**
+* send packet, implementing attempts and timeouts
+* the global variable char[5] packetToSend must be loaded
+*/
+void sendPacket(){
   DONE = FALSE;
   if(attempts == 3){
-    printf("Failed 3 times, exiting...\n");
+    printf("TIMEOUT: Failed 3 times, exiting...\n");
     exit(-1);
   }
   printf("Attempt %d/3:\n", (attempts + 1));
   int sentBytes = 0;
-  while(sentBytes != 5){
-    sentBytes = write(receiver, SET, 5);
+  while(sentBytes != LENGTH){
+    sentBytes = write(receiver, packetToSend, LENGTH);
     printf("sentBytes: %d\n", sentBytes);
   }
   attempts++;
@@ -67,57 +60,27 @@ void sendSET(){
   }
 }
 
-//returns the C in [F|A|C|Bcc|F] - which can be the SET or the UA
-void receiveUA(int fd){
-  unsigned char c;//last char received
-  int state = 0;
-  printf("Receiving UA...\n");
-  while(state != 5){
-    read(fd, &c, 1);
-    printf("State %d - char: 0x%X\n", state, c);
-    switch (state) {
-      case 0://expecting flag
-        if(c == UA[0]){
-          state = 1;
-        }//else stay in same state
-        break;
-      case 1://expecting A
-        if(c == UA[1]){
-          state = 2;
-        }else if(c != UA[0]){//if not FLAG instead of A
-          state = 0;
-        }//else stay in same state
-        break;
-      case 2://Expecting C_SET
-        if(c == UA[2]){
-          state = 3;
-        }else if(c == UA[0]){//if FLAG received
-          state = 1;
-        }else {//else go back to beggining
-          state = 0;
-        }
-        break;
-      case 3://Expecting BCC
-        if (c == UA[3]){
-          state = 4;
-        }else {
-          state = 0;//else go back to beggining
-        }
-        break;
-      case 4://Expecting FLAG
-        if (c == UA[4]){
-          state = 5;
-        }else{
-          state = 0;//else go back to beggining
-        }
-        break;
-    }
+/**
+* copies the next packet to send to the global variable sourcePacket
+* so that the sendPacket function can use ir
+*/
+void copyToPacketToSend(unsigned char * sourcePacket, int length){
+  LENGTH = length;
+  for(int i = 0; i < LENGTH; i++){
+    packetToSend[i] = sourcePacket[i];
   }
-  DONE = TRUE;
-  alarm(0);
-  printf("Received UA properly\n");
 }
 
+void sendWithTimeout(unsigned char * sourcePacket, char expecting, int length){
+  packetToSend = (unsigned char *)  malloc(sizeof(unsigned char) * length);
+  copyToPacketToSend(sourcePacket, length);
+  (void) signal(SIGALRM, sendPacket);  // instala rotina que atende interrupcao
+  printf("Initial alarm has been set\n");
+  sendPacket();
+  printf("packet has been sent\n");
+  getCmd(receiver, expecting, TRUE);//True means stop alarm after receiving
+  free(packetToSend);
+}
 
 /**
 * sends a SET to the receiver, implementing timeouts
@@ -128,11 +91,7 @@ void llopen(int r){
   prepareSet();
   prepareUA();
   printf("Prepared Set and UA\n");
-  (void) signal(SIGALRM, sendSET);  // instala rotina que atende interrupcao
-  printf("Initial alarm has been set\n");
-  sendSET();
-  printf("Set has been sent\n");
-  receiveUA(receiver);
+  sendWithTimeout(SET, UA[2], 5);
 }
 
 void stuffing(unsigned char * data, int * countS, char byte, int i){
@@ -178,7 +137,10 @@ int llwrite(int receiver, char * data, int size){
   for(int i = 0; i < sizeToWrite; i++){
     printf("%X,", I[i]);
   }
-  int written = write(receiver, I, sizeToWrite);
-  printf("\nwritten:%d\n", written);
+  printf("\n");
+  sendWithTimeout(I, RR_1, sizeToWrite);
+  //int written = write(receiver, I, sizeToWrite);
+  //printf("\nwritten:%d\n", written);
+  //getCmd(receiver, RR_1, TRUE);
   return -1;
 }

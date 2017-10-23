@@ -10,6 +10,8 @@
 #include <unistd.h>
 #include <signal.h>
 
+#include "defines.h"
+#include "utils.c"
 #include "sender_utils.c"
 
 #define BAUDRATE B38400
