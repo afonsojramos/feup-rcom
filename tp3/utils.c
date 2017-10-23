@@ -1,3 +1,7 @@
+#include <stdio.h>
+#include <unistd.h>
+#include "defines.h"
+
 extern int DONE;
 
 /**
