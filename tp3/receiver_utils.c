@@ -29,6 +29,14 @@
 
 #define c2Bit(x)	(x&0b01000000)>>6
 
+char inline comp(char x){
+	if(x==1){
+		return 0;	
+	} else {
+		return 1;
+	}
+}
+
 void printB(char* str, unsigned n){
 	int i;	
 	for(i=0;i<n;i++){
@@ -38,8 +46,8 @@ void printB(char* str, unsigned n){
 }
 
 
-int sendIU(int fd, char control, char flag){
-
+int sendSU(int fd, char control, char flag){
+	printf("%d", flag);
 	//take care of the flag, if need be.
 	if((control==CTRL_RR||control==CTRL_REJ)&&flag!=0){
 		control|=1<<7;	
@@ -53,7 +61,6 @@ int sendIU(int fd, char control, char flag){
 	cmd[4] = FLAG;				// ┖ end flag
 
 	//printB((char*) cmd, 5);
-
 	return write(fd, cmd, 5);
 }
 
@@ -92,6 +99,7 @@ int destuff(char* str, unsigned int n){
 	return n;
 }
 
+
 char getCmd(int fd){
 	char c;
 	char ret;
@@ -117,10 +125,7 @@ char getCmd(int fd){
 			break;
 			case 2:
 				packet_C=c; // we received the byte C, here. Storing.
-				if(c==C_SET)
-					state=3;
-				else
-					state=0;
+				state=3;
 			break;
 			case 3: 
 				if((packet_A ^ packet_C)==c)
@@ -150,9 +155,13 @@ char getCmd(int fd){
 
 char llopen(int fd){
 	
-	char cmd = getCmd(fd); // Open fd 
-	printf("We got a %x!\n", cmd);
-	int retUA=sendIU(fd, CTRL_UA, 0);
+	char cmd;
+	do{
+		cmd = getCmd(fd); // Open fd 
+		DEBUG_PRINT("[DEBUG] We got a %x (should be a UA-3)!\n", cmd);
+	} while(cmd!=C_SET);
+
+	int retUA=sendSU(fd, CTRL_UA, 0);
 	if(retUA==-1){
 		return retUA;
 	}
@@ -161,7 +170,7 @@ char llopen(int fd){
 
 
 int llread(int fd, char* dest){
-	printf("Entered llread.\n");
+	DEBUG_PRINT("[DEBUG] Entered llread.\n");
 	int rsf=0; // (bytes) read so far
 	int cbs=100; // current buffern size
 
@@ -174,11 +183,11 @@ int llread(int fd, char* dest){
 	char c;
 	int state=0;
 	int BCC_OK, STOP=0;
+	char packet_A, packet_C;
 	while (STOP==0) {       /* loop for input */
 		//printf("waiting for input...\n");
 		read(fd, &c, 1);   /* returns after 1 char has been input */
 		//printf("read %x state:%d\n", c, state);
-		char packet_A, packet_C;
 		switch (state){
 			case 0:
 				if (c==FLAG){
@@ -237,8 +246,8 @@ int llread(int fd, char* dest){
 	int n = destuff(dest, rsf);
 
 	if(n<0){
-		//The destuff function didn't like the boyd passed. We should reject.
-		sendIU(fd, CTRL_REJ, 1);
+		//The destuff function didn't like the body passed. We should reject.
+		sendSU(fd, CTRL_REJ, 1);
 	}
 
 	// Time to check our BCC2
@@ -249,14 +258,15 @@ int llread(int fd, char* dest){
 		BCC2^=dest[i];
 	}
 
-	//printf("%x==%x?\n\n", BCC2, dest[n-1]);
+	DEBUG_PRINT("[DEBUG] BCC2 test: %x==%x?\n", BCC2, dest[n-1]);
 	if(BCC2 != dest[n-1]){
 		//BCC2 check failed!
-		sendIU(fd, CTRL_REJ, 1);
+		DEBUG_PRINT("[DEBUG]\t\t\tFAILED!\n");
+		sendSU(fd, CTRL_REJ, 1);
 	}else{
 		// Getting this frame was an absolute success! Acknowledging!
-		DEBUG_PRINT("[DEBUG] sending RR(%d).\n", c2Bit(c));
-		sendIU(fd, CTRL_RR, c2Bit(c));
+		DEBUG_PRINT("[DEBUG] sending RR(%d).\n", c2Bit(packet_C));
+		sendSU(fd, CTRL_RR, comp(c2Bit(packet_C)));
 	}
 	
 	return 0;	

@@ -78,7 +78,7 @@ int main(int argc, char** argv)
       exit(-1);
     }
 
-    printf("New termios structure set\n");
+    //printf("New termios structure set\n");
 
 	char ret=llopen(fd);
 	printf("llopen returned %d.\n", ret);
