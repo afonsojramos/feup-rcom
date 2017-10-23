@@ -15,14 +15,55 @@
 #define C_S0 0x00
 #define C_S1 0x40
 
+#define CTRL_SET  	0b00000011
+#define CTRL_DISC 	0b00001011
+#define CTRL_UA		0b00000111
+#define CTRL_RR		0b00000101
+#define CTRL_REJ	0b00000001
+
+#ifdef DEBUG
+	#define DEBUG_PRINT(str, ...) printf(str, ##__VA_ARGS__)
+#else
+	#define DEBUG_PRINT(str, ...) 
+#endif
+
+#define c2Bit(x)	(x&0b01000000)>>6
+
+char inline comp(char x){
+	if(x==1){
+		return 0;	
+	} else {
+		return 1;
+	}
+}
 
 void printB(char* str, unsigned n){
 	int i;	
 	for(i=0;i<n;i++){
-		printf("%x", str[i]);		
+		printf("%x ", (unsigned char) str[i]);		
 	}
 	printf("\n");
 }
+
+
+int sendSU(int fd, char control, char flag){
+	printf("%d", flag);
+	//take care of the flag, if need be.
+	if((control==CTRL_RR||control==CTRL_REJ)&&flag!=0){
+		control|=1<<7;	
+	}
+	unsigned char cmd[5];
+
+	cmd[0] = FLAG;				// ┎ start flag
+	cmd[1] = A;					// ┃ address field
+	cmd[2] = control;			// ┃ control field
+	cmd[3] = cmd[1] ^ cmd[2];	// ┃ BCC1
+	cmd[4] = FLAG;				// ┖ end flag
+
+	//printB((char*) cmd, 5);
+	return write(fd, cmd, 5);
+}
+
 
 int destuff(char* str, unsigned int n){
 	/*
@@ -48,14 +89,16 @@ int destuff(char* str, unsigned int n){
 				}
 				n--;
 			}else{
-				fprintf(stderr, "I got an unrecognized escape seq. Exiting...\n");
-				assert(0); // we got an unrecognized escape seq. // TODO Send REJ
+				fprintf(stderr, "I got an unrecognized escape seq. Rejecting.\n");
+				// we got an unrecognized escape seq. returning error.
+				return -1;
 			}
 		}
 	}
 
 	return n;
 }
+
 
 char getCmd(int fd){
 	char c;
@@ -82,10 +125,7 @@ char getCmd(int fd){
 			break;
 			case 2:
 				packet_C=c; // we received the byte C, here. Storing.
-				if(c==C_SET)
-					state=3;
-				else
-					state=0;
+				state=3;
 			break;
 			case 3: 
 				if((packet_A ^ packet_C)==c)
@@ -113,26 +153,15 @@ char getCmd(int fd){
 	return -1;
 }
 
-int sendUA(int fd){ //prepare message
-
-	unsigned char UA[5];
-
-	UA[0] = FLAG;
-	UA[1] = A;
-	UA[2] = C_UA;
-	UA[3] = UA[1] ^ UA[2];
-	UA[4] = FLAG;
-
-	printB((char*) UA, 5);
-
-	return write(fd, UA, 5);
-}
-
 char llopen(int fd){
 	
-	char cmd = getCmd(fd); // Open fd 
-	printf("We got a %x!\n", cmd);
-	int retUA=sendUA(fd);
+	char cmd;
+	do{
+		cmd = getCmd(fd); // Open fd 
+		DEBUG_PRINT("[DEBUG] We got a %x (should be a UA-3)!\n", cmd);
+	} while(cmd!=C_SET);
+
+	int retUA=sendSU(fd, CTRL_UA, 0);
 	if(retUA==-1){
 		return retUA;
 	}
@@ -141,7 +170,7 @@ char llopen(int fd){
 
 
 int llread(int fd, char* dest){
-	printf("Entered llread.\n");
+	DEBUG_PRINT("[DEBUG] Entered llread.\n");
 	int rsf=0; // (bytes) read so far
 	int cbs=100; // current buffern size
 
@@ -154,11 +183,11 @@ int llread(int fd, char* dest){
 	char c;
 	int state=0;
 	int BCC_OK, STOP=0;
+	char packet_A, packet_C;
 	while (STOP==0) {       /* loop for input */
 		//printf("waiting for input...\n");
 		read(fd, &c, 1);   /* returns after 1 char has been input */
 		//printf("read %x state:%d\n", c, state);
-		char packet_A, packet_C;
 		switch (state){
 			case 0:
 				if (c==FLAG){
@@ -216,6 +245,11 @@ int llread(int fd, char* dest){
 
 	int n = destuff(dest, rsf);
 
+	if(n<0){
+		//The destuff function didn't like the body passed. We should reject.
+		sendSU(fd, CTRL_REJ, 1);
+	}
+
 	// Time to check our BCC2
 	int i;
 	unsigned char BCC2=0x00;
@@ -223,16 +257,17 @@ int llread(int fd, char* dest){
 	for(i=0; i<n-1;i++){ // until n-2 because n	-1 is the BCC2 itself.
 		BCC2^=dest[i];
 	}
-	//printf("%x==%x?\n\n", BCC2, dest[n-1]);
+
+	DEBUG_PRINT("[DEBUG] BCC2 test: %x==%x?\n", BCC2, dest[n-1]);
 	if(BCC2 != dest[n-1]){
 		//BCC2 check failed!
-		// TODO Send REJ
+		DEBUG_PRINT("[DEBUG]\t\t\tFAILED!\n");
+		sendSU(fd, CTRL_REJ, 1);
 	}else{
 		// Getting this frame was an absolute success! Acknowledging!
-
-		// TODO send RR
+		DEBUG_PRINT("[DEBUG] sending RR(%d).\n", c2Bit(packet_C));
+		sendSU(fd, CTRL_RR, comp(c2Bit(packet_C)));
 	}
-	printB(dest, n);
 	
 	return 0;	
 }

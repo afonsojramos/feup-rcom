@@ -7,7 +7,7 @@
 
 int main(){
 
-	//sendUA(stdout);exit(0);
+	sendIU(STDOUT_FILENO, CTRL_REJ, 1);exit(0);
 	int i;
 	char str[] = {0x14, 0x54, 0x56, 0x74, 0x7d, 0x5e, 0x25};
 	printB(str, LEN);
