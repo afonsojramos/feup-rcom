@@ -3,44 +3,26 @@
 #include <stdio.h>
 #include <assert.h>
 
-#define FLAG 0x7E
-#define A 0x03
-#define C_SET 0x03
-#define C_UA 0x07
-
-#define FLAG_R1 0x7D
-#define FLAG_R2 0x5E
-#define FLAG_R3 0x5D
-
-#define C_S0 0x00
-#define C_S1 0x40
-
-#define CTRL_SET  	0b00000011
-#define CTRL_DISC 	0b00001011
-#define CTRL_UA		0b00000111
-#define CTRL_RR		0b00000101
-#define CTRL_REJ	0b00000001
-
 #ifdef DEBUG
 	#define DEBUG_PRINT(str, ...) printf(str, ##__VA_ARGS__)
 #else
-	#define DEBUG_PRINT(str, ...) 
+	#define DEBUG_PRINT(str, ...)
 #endif
 
 #define c2Bit(x)	(x&0b01000000)>>6
 
 char inline comp(char x){
 	if(x==1){
-		return 0;	
+		return 0;
 	} else {
 		return 1;
 	}
 }
 
 void printB(char* str, unsigned n){
-	int i;	
+	int i;
 	for(i=0;i<n;i++){
-		printf("%x ", (unsigned char) str[i]);		
+		printf("%x ", (unsigned char) str[i]);
 	}
 	printf("\n");
 }
@@ -49,8 +31,8 @@ void printB(char* str, unsigned n){
 int sendSU(int fd, char control, char flag){
 	printf("%d", flag);
 	//take care of the flag, if need be.
-	if((control==CTRL_RR||control==CTRL_REJ)&&flag!=0){
-		control|=1<<7;	
+	if((control==RR_0||control==C_REJ)&&flag!=0){
+		control|=1<<7;
 	}
 	unsigned char cmd[5];
 
@@ -69,7 +51,7 @@ int destuff(char* str, unsigned int n){
 	/*
 
 	0x7e is stuffed to 0x7d 0x5e
-	0x7d is stuffed to 0x7d 0x5d	
+	0x7d is stuffed to 0x7d 0x5d
 	*/
 
 	int i,j;
@@ -99,69 +81,10 @@ int destuff(char* str, unsigned int n){
 	return n;
 }
 
-
-char getCmd(int fd){
-	char c;
-	char ret;
-	int state=0;
-	int BCC_OK;
-	while (1) {       /* loop for input */
-		read(fd, &c, 1);   /* returns after 1 char has been input */
-		//printf("read %x state:%d\n", c, state);
-		char packet_A, packet_C;
-		switch (state){
-			case 0:
-				if (c==FLAG){
-					state = 1; // this is the beginning of a packet
-				}else
-					state=0;
-			break;
-			case 1:
-				packet_A=c; // we received the byte A, here. Storing.
-				if(c==A)
-					state = 2;
-				else
-					state = 0;
-			break;
-			case 2:
-				packet_C=c; // we received the byte C, here. Storing.
-				state=3;
-			break;
-			case 3: 
-				if((packet_A ^ packet_C)==c)
-					BCC_OK=1;
-				else
-					BCC_OK=0;
-
-				if(BCC_OK)
-					state=4;
-				else
-					state=0;
-			break;
-			case 4:
-				if(c==FLAG){
-					// SUCCESS!!
-					ret=packet_C;
-					return ret;
-				}else{
-					state=0;
-				}			
-			break;
-
-		}	
-    }
-	return -1;
-}
-
 char llopen(int fd){
-	
-	char cmd;
-	do{
-		cmd = getCmd(fd); // Open fd 
-		DEBUG_PRINT("[DEBUG] We got a %x (should be a UA-3)!\n", cmd);
-	} while(cmd!=C_SET);
+	getCmd(fd, C_SET, FALSE); //TODO: make C_SET a thing
 
-	int retUA=sendSU(fd, CTRL_UA, 0);
+	int retUA=sendSU(fd, C_UA, 0);//TODO: make this accessible
 	if(retUA==-1){
 		return retUA;
 	}
@@ -209,7 +132,7 @@ int llread(int fd, char* dest){
 				else
 					state=0;
 			break;
-			case 3: 
+			case 3:
 				if((packet_A ^ packet_C)==c)
 					BCC_OK=1;
 				else
@@ -234,20 +157,20 @@ int llread(int fd, char* dest){
 						}
 					}
 					dest[rsf++]=c;
-				}			
+				}
 			break;
 
-		}	
+		}
     }
 
-	
+
 	// having read the whole datagram, ne now need to destuff it.
 
 	int n = destuff(dest, rsf);
 
 	if(n<0){
 		//The destuff function didn't like the body passed. We should reject.
-		sendSU(fd, CTRL_REJ, 1);
+		sendSU(fd, C_REJ, 1);
 	}
 
 	// Time to check our BCC2
@@ -262,12 +185,12 @@ int llread(int fd, char* dest){
 	if(BCC2 != dest[n-1]){
 		//BCC2 check failed!
 		DEBUG_PRINT("[DEBUG]\t\t\tFAILED!\n");
-		sendSU(fd, CTRL_REJ, 1);
+		sendSU(fd, C_REJ, 1);
 	}else{
 		// Getting this frame was an absolute success! Acknowledging!
 		DEBUG_PRINT("[DEBUG] sending RR(%d).\n", c2Bit(packet_C));
-		sendSU(fd, CTRL_RR, comp(c2Bit(packet_C)));
+		sendSU(fd, C_REJ, comp(c2Bit(packet_C)));
 	}
-	
-	return 0;	
+
+	return 0;
 }
