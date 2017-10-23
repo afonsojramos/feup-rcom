@@ -1,8 +1,8 @@
 CC=gcc
-CFLAGS=-Wall.
+CFLAGS=-Wall -DDEBUG
 
 receiver_task: receiver.c
-	$(CC) receiver.c -o receiver
+	$(CC) receiver.c -o receiver $(CFLAGS)
 
 clean:
 	rm receiver

@@ -21,6 +21,14 @@
 #define CTRL_RR		0b00000101
 #define CTRL_REJ	0b00000001
 
+#ifdef DEBUG
+	#define DEBUG_PRINT(str, ...) printf(str, ##__VA_ARGS__)
+#else
+	#define DEBUG_PRINT(str, ...) 
+#endif
+
+#define c2Bit(x)	(x&0b01000000)>>6
+
 void printB(char* str, unsigned n){
 	int i;	
 	for(i=0;i<n;i++){
@@ -30,7 +38,7 @@ void printB(char* str, unsigned n){
 }
 
 
-sendIU(int fd, char control, char flag){
+int sendIU(int fd, char control, char flag){
 
 	//take care of the flag, if need be.
 	if((control==CTRL_RR||control==CTRL_REJ)&&flag!=0){
@@ -247,10 +255,9 @@ int llread(int fd, char* dest){
 		sendIU(fd, CTRL_REJ, 1);
 	}else{
 		// Getting this frame was an absolute success! Acknowledging!
-
-		// TODO send RR
+		DEBUG_PRINT("[DEBUG] sending RR(%d).\n", c2Bit(c));
+		sendIU(fd, CTRL_RR, c2Bit(c));
 	}
-	printB(dest, n);
 	
 	return 0;	
 }

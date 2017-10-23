@@ -86,6 +86,8 @@ int main(int argc, char** argv)
 	char* receive=NULL;
 
 	llread(fd, receive);
+
+
     tcsetattr(fd,TCSANOW,&oldtio);
     close(fd);
     return 0;
