@@ -14,8 +14,9 @@ int LENGTH;
 unsigned char SET[5];
 unsigned char UA[5];
 
+extern int DONE;
+
 int attempts = 0;
-int DONE;
 int receiver;
 unsigned char * I;//trama de informacao a enviar
 char CurrentC = C_S0;//the first C sent is C_S0, it will then change on each iteration

@@ -2,7 +2,7 @@
 #include <unistd.h>
 #include "defines.h"
 
-extern int DONE;
+int DONE;
 
 /**
 * implementing state machine
