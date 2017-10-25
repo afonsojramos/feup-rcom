@@ -146,9 +146,10 @@ int prepareI(char * data, int size, char C){
 /**
 * sends a packet of bytes to the receiver, implementing timeouts
 * @param receiver a file descriptor for the receiver, already open
-* @return -1 if fails or number of bytes written otherwise
+* @return -1 if fails or 1 if it is successful
 */
 int llwrite(int receiver, char * data, int size){
+  DONE = FALSE;
   int sizeToWrite = prepareI(data, size, CurrentC);//loads the data into global I
   for(int i = 0; i < sizeToWrite; i++){
     printf("%X,", I[i]);
@@ -156,8 +157,5 @@ int llwrite(int receiver, char * data, int size){
   printf("\n");
   sendWithTimeout(I, getExpecting(), sizeToWrite);
   complementCS();
-  //int written = write(receiver, I, sizeToWrite);
-  //printf("\nwritten:%d\n", written);
-  //getCmd(receiver, C_RR1, TRUE);
-  return -1;
+  return DONE;
 }

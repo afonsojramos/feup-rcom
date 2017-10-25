@@ -82,6 +82,12 @@ int main(int argc, char** argv){
     llopen(fd);
     char * data = "123~56}89";
     llwrite(fd, data, 10);
+    char * data2 = "ola, daniel";
+    llwrite(fd, data2, 12);
+    char * data3 = "xau, daniel";
+    llwrite(fd, data3, 12);
+    char * data4 = "AMF, daniel";
+    llwrite(fd, data4, 12);
 
     tcsetattr(fd,TCSANOW,&oldtio);
     close(fd);
