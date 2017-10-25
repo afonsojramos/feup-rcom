@@ -11,11 +11,12 @@
 #define C_UA 0x07
 #define C_S0 0x00
 #define C_S1 0x40
-#define RR_0 0x05 //0b00000101
-#define RR_1 0x85 //0b10000101
+#define C_RR0 0x05 //0b00000101
+#define C_RR1 0x85 //0b10000101
 
 
 //#define CTRL_SET  	0b00000011
 //#define CTRL_DISC 	0b00001011
 //#define CTRL_UA		0b00000111
-#define C_REJ	0x01 //0b00000001
+#define C_REJ0	0x01 	//0b00000001
+#define C_REJ1	0x81 	//0b10000001
