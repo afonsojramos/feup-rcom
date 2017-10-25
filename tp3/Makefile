@@ -18,7 +18,9 @@ clean:
 	rm sender
 
 runR: receiver_task
+	clear
 	./receiver /dev/ttyS0
 
 runS: sender_task
+	clear
 	./sender /dev/ttyS0
