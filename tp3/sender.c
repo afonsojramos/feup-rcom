@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <signal.h>
+#include <strings.h>
 
 #include "defines.h"
 #include "utils.c"

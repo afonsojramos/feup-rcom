@@ -11,7 +11,7 @@
 
 #define c2Bit(x)	(x&0b01000000)>>6
 
-char inline comp(char x){
+char comp(char x){
 	if(x==1){
 		return 0;
 	} else {
