@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-Wall -DDEBUG -std=c11
+CFLAGS=-Wall -g -DDEBUG -std=c11
 
 all: receiver_task sender_task
 
