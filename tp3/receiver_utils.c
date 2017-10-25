@@ -80,7 +80,7 @@ int llread(int fd, char* dest){
 	int cbs=100; // current buffern size
 
 	/* Allocate memory for writing Data Packets*/
-	dest=malloc(sizeof(char)*cbs);
+	dest=malloc(sizeof(char)*(cbs+1));
 	if(dest==NULL){
 		perror("malloc");
 	}
@@ -92,7 +92,7 @@ int llread(int fd, char* dest){
 	while (STOP==0) {       /* loop for input */
 		//printf("waiting for input...\n");
 		read(fd, &c, 1);   /* returns after 1 char has been input */
-		//printf("read %x state:%d\n", c, state);
+		printf("read %x state:%d\n", c, state);
 		switch (state){
 			case 0:
 				if (c==FLAG){
@@ -111,6 +111,8 @@ int llread(int fd, char* dest){
 				packet_C=c; // we received the byte C, here. Storing.
 				if(c==C_S0 || c==C_S1)
 					state=3;
+				else if(c==C_DISC)
+					state=5;
 				else
 					state=0;
 			break;
@@ -120,9 +122,10 @@ int llread(int fd, char* dest){
 				else
 					BCC_OK=0;
 
-				if(BCC_OK)
+				if(BCC_OK){
 					state=4;
-				else
+					
+				}else
 					state=0;
 			break;
 			case 4:
@@ -141,6 +144,27 @@ int llread(int fd, char* dest){
 					dest[rsf++]=c;
 				}
 			break;
+			case 5:
+				if((packet_A ^ packet_C)==c)
+					BCC_OK=1;
+				else
+					BCC_OK=0;
+
+				if(BCC_OK){
+					state=6;
+					
+				}else
+					state=0;
+			break;
+				case 6:
+					if(c==FLAG){
+						// end of datagram!! We got a DISC though.
+						STOP=1;
+						sendSU(fd, C_DISC);
+						getCmd(fd, C_UA, FALSE);
+						return -6; // signal DISC
+					}
+				break;
 
 		}
     }
@@ -189,6 +213,7 @@ int llread(int fd, char* dest){
 		}
 		
 	}
+	printf("dest: %s\n", dest);
 
 	return 0;
 }
