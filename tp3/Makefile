@@ -20,5 +20,5 @@ clean:
 runR: receiver_task
 	./receiver /dev/ttyS0
 
-runS: receiver_task
-	./receiver /dev/ttyS0
+runS: sender_task
+	./sender /dev/ttyS0
