@@ -88,7 +88,7 @@ int main(int argc, char** argv){
     llwrite(fd, data3, 12);
     char * data4 = "AMF, daniel";
     llwrite(fd, data4, 12);
-
+    llclose();
     tcsetattr(fd,TCSANOW,&oldtio);
     close(fd);
     return 0;

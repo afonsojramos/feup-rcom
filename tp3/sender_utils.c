@@ -13,6 +13,7 @@ int LENGTH;
 
 unsigned char SET[5];
 unsigned char UA[5];
+unsigned char DISC[5];
 
 extern int DONE;
 extern int attempts;
@@ -34,6 +35,13 @@ void prepareUA(){ //prepare message to receive, test agains the one the receiver
   UA[2] = C_UA;
   UA[3] = UA[1] ^ UA[2];
   UA[4] = FLAG;
+}
+void prepareDISC(){ //prepare message to receive, test agains the one the receiver sends
+  DISC[0] = FLAG;
+  DISC[1] = A;
+  DISC[2] = C_DISC;
+  DISC[3] = DISC[1] ^ DISC[2];
+  DISC[4] = FLAG;
 }
 
 char getExpecting(){
@@ -158,4 +166,12 @@ int llwrite(int receiver, char * data, int size){
   sendWithTimeout(I, getExpecting(), sizeToWrite);
   complementCS();
   return DONE;
+}
+
+int llclose(){
+  prepareDISC();
+  printf("Prepared DISC\n");
+  sendWithTimeout(DISC, DISC[2], 5);
+  int sentBytes = write(receiver, UA, 5);
+  return -1;
 }
