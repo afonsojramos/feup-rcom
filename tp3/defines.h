@@ -20,3 +20,5 @@
 //#define CTRL_UA		0b00000111
 #define C_REJ0	0x01 	//0b00000001
 #define C_REJ1	0x81 	//0b10000001
+
+#define C_DISC 	0x0b	//0b00001011
