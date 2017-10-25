@@ -36,6 +36,21 @@ void prepareUA(){ //prepare message to receive, test agains the one the receiver
   UA[4] = FLAG;
 }
 
+char getExpecting(){
+  if(CurrentC == C_S0){
+    return C_RR1;
+  }else{
+    return C_RR0;
+  }
+}
+
+void complementCS(){
+  if(CurrentC == C_S0){
+    CurrentC = C_S1;
+  }else{
+    CurrentC = C_S0;
+  }
+}
 
 /**
 * send packet, implementing attempts and timeouts
@@ -139,7 +154,8 @@ int llwrite(int receiver, char * data, int size){
     printf("%X,", I[i]);
   }
   printf("\n");
-  sendWithTimeout(I, C_RR1, sizeToWrite);
+  sendWithTimeout(I, getExpecting(), sizeToWrite);
+  complementCS();
   //int written = write(receiver, I, sizeToWrite);
   //printf("\nwritten:%d\n", written);
   //getCmd(receiver, C_RR1, TRUE);
