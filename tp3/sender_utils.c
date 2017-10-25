@@ -22,6 +22,14 @@ int receiver;
 unsigned char * I;//trama de informacao a enviar
 char CurrentC = C_S0;//the first C sent is C_S0, it will then change on each iteration
 
+void prepareCmd(unsigned char * CMD, unsigned char C){
+  CMD[0] = FLAG;
+  CMD[1] = A;
+  CMD[2] = C;
+  CMD[3] = CMD[1] ^ CMD[2];
+  CMD[4] = FLAG;
+}
+
 void prepareSet(){ //prepare message to send
   SET[0] = FLAG;
   SET[1] = A;
@@ -112,8 +120,8 @@ void sendWithTimeout(unsigned char * sourcePacket, char expecting, int length){
 */
 void llopen(int r){
   receiver = r;
-  prepareSet();
-  prepareUA();
+  prepareCmd(SET, C_SET);
+  prepareCmd(UA, C_UA);
   printf("Prepared Set and UA\n");
   sendWithTimeout(SET, UA[2], 5);
 }
@@ -169,7 +177,7 @@ int llwrite(int receiver, char * data, int size){
 }
 
 int llclose(){
-  prepareDISC();
+  prepareCmd(DISC, C_DISC);
   printf("Prepared DISC\n");
   sendWithTimeout(DISC, DISC[2], 5);
   int sentBytes = write(receiver, UA, 5);
