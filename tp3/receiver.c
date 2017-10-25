@@ -91,7 +91,9 @@ int main(int argc, char** argv)
 	char* receive=NULL;
 
 	llread(fd, receive);
-
+	llread(fd, receive);
+	llread(fd, receive);
+	llread(fd, receive);
 
     tcsetattr(fd,TCSANOW,&oldtio);
     close(fd);

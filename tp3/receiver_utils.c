@@ -28,12 +28,8 @@ void printB(char* str, unsigned n){
 }
 
 
-int sendSU(int fd, char control, char flag){
-	printf("%d", flag);
-	//take care of the flag, if need be.
-	if((control==RR_0||control==C_REJ)&&flag!=0){
-		control|=1<<7;
-	}
+int sendSU(int fd, char control){
+
 	unsigned char cmd[5];
 
 	cmd[0] = FLAG;				// ┎ start flag
@@ -42,7 +38,7 @@ int sendSU(int fd, char control, char flag){
 	cmd[3] = cmd[1] ^ cmd[2];	// ┃ BCC1
 	cmd[4] = FLAG;				// ┖ end flag
 
-	//printB((char*) cmd, 5);
+	printB((char*) cmd, 5);
 	return write(fd, cmd, 5);
 }
 
@@ -84,7 +80,7 @@ int destuff(char* str, unsigned int n){
 char llopen(int fd){
 	getCmd(fd, C_SET, FALSE); //TODO: make C_SET a thing
 
-	int retUA=sendSU(fd, C_UA, 0);//TODO: make this accessible
+	int retUA=sendSU(fd, C_UA);//TODO: make this accessible
 	if(retUA==-1){
 		return retUA;
 	}
@@ -168,9 +164,16 @@ int llread(int fd, char* dest){
 
 	int n = destuff(dest, rsf);
 
+	printB(dest, n);
+
 	if(n<0){
 		//The destuff function didn't like the body passed. We should reject.
-		sendSU(fd, C_REJ, 1);
+		DEBUG_PRINT("[DEBUG] Error occurred during destuffing. Sending C_REJ(%d).\n", comp(c2Bit(packet_C)));
+		if(comp(c2Bit(packet_C))==0){
+			sendSU(fd, C_REJ0);
+		}else{
+			sendSU(fd, C_REJ1);
+		}
 	}
 
 	// Time to check our BCC2
@@ -185,11 +188,20 @@ int llread(int fd, char* dest){
 	if(BCC2 != dest[n-1]){
 		//BCC2 check failed!
 		DEBUG_PRINT("[DEBUG]\t\t\tFAILED!\n");
-		sendSU(fd, C_REJ, 1);
+		if(comp(c2Bit(packet_C))==0){
+			sendSU(fd, C_REJ0);
+		}else{
+			sendSU(fd, C_REJ1);
+		}
 	}else{
 		// Getting this frame was an absolute success! Acknowledging!
-		DEBUG_PRINT("[DEBUG] sending RR(%d).\n", c2Bit(packet_C));
-		sendSU(fd, C_REJ, comp(c2Bit(packet_C)));
+		DEBUG_PRINT("[DEBUG] sending RR(%d).\n", comp(c2Bit(packet_C)));
+		if(comp(c2Bit(packet_C))==0){
+			sendSU(fd, C_RR0);
+		}else{
+			sendSU(fd, C_RR1);
+		}
+		
 	}
 
 	return 0;
