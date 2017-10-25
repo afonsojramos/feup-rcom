@@ -90,10 +90,14 @@ int main(int argc, char** argv)
 
 	char* receive=NULL;
 
-	llread(fd, receive);
-	llread(fd, receive);
-	llread(fd, receive);
-	llread(fd, receive);
+	for(int i =0; i<5;i++){
+		ret=llread(fd, receive);
+		if(ret==-6){
+			printf("connection closed by remote host.\n");
+		}
+		//printf("dest: 0x%x\n", receive);
+		//printf("%s\n", receive);
+	}
 
     tcsetattr(fd,TCSANOW,&oldtio);
     close(fd);
