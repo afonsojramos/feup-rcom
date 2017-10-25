@@ -3,12 +3,6 @@
 #include <stdio.h>
 #include <assert.h>
 
-#ifdef DEBUG
-	#define DEBUG_PRINT(str, ...) printf(str, ##__VA_ARGS__)
-#else
-	#define DEBUG_PRINT(str, ...)
-#endif
-
 #define c2Bit(x)	(x&0b01000000)>>6
 
 char comp(char x){
@@ -17,14 +11,6 @@ char comp(char x){
 	} else {
 		return 1;
 	}
-}
-
-void printB(char* str, unsigned n){
-	int i;
-	for(i=0;i<n;i++){
-		printf("%x ", (unsigned char) str[i]);
-	}
-	printf("\n");
 }
 
 

@@ -5,6 +5,22 @@
 int DONE;
 int attempts = 0;
 
+
+#ifdef DEBUG
+	#define DEBUG_PRINT(str, ...) (printf("[DEBUG] "), printf(str, ##__VA_ARGS__))
+#else
+	#define DEBUG_PRINT(str, ...)
+#endif
+
+
+void printB(char* str, unsigned n){
+	int i;
+	for(i=0;i<n;i++){
+		printf("%x ", (unsigned char) str[i]);
+	}
+	printf("\n");
+}
+
 /**
 * implementing state machine
 * returns the C in [F|A|C|Bcc|F] - where C can be the SET, the UA, ... @see expecting
