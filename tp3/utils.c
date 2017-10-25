@@ -3,6 +3,7 @@
 #include "defines.h"
 
 int DONE;
+int attempts = 0;
 
 /**
 * implementing state machine
@@ -56,8 +57,11 @@ void getCmd(int fd, unsigned char expecting, char stopAlarm){
   		}
     }
     DONE = TRUE;
+
     if(stopAlarm){
+			printf("stopped ALARM\n");
       alarm(0);
+	    attempts = 0;//reset the attempt count
     }
     printf("Received CMD properly\n");
 

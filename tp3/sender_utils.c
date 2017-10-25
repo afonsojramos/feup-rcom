@@ -15,8 +15,8 @@ unsigned char SET[5];
 unsigned char UA[5];
 
 extern int DONE;
+extern int attempts;
 
-int attempts = 0;
 int receiver;
 unsigned char * I;//trama de informacao a enviar
 char CurrentC = C_S0;//the first C sent is C_S0, it will then change on each iteration
@@ -139,9 +139,9 @@ int llwrite(int receiver, char * data, int size){
     printf("%X,", I[i]);
   }
   printf("\n");
-  sendWithTimeout(I, RR_1, sizeToWrite);
+  sendWithTimeout(I, C_RR1, sizeToWrite);
   //int written = write(receiver, I, sizeToWrite);
   //printf("\nwritten:%d\n", written);
-  //getCmd(receiver, RR_1, TRUE);
+  //getCmd(receiver, C_RR1, TRUE);
   return -1;
 }
