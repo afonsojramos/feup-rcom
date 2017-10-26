@@ -22,3 +22,5 @@
 #define C_REJ1	0x81 	//0b10000001
 
 #define C_DISC 	0x0b	//0b00001011
+
+#define BAUDRATE B38400

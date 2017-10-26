@@ -15,7 +15,6 @@
 #include "utils.c"
 #include "sender_utils.c"
 
-#define BAUDRATE B38400
 #define _POSIX_SOURCE 1 /* POSIX compliant source */
 
 
@@ -81,13 +80,15 @@ int main(int argc, char** argv){
 
     llopen(fd);
     char * data = "123~56}89";
-    llwrite(fd, data, 10);
+    llwrite(fd, data, 9);
     char * data2 = "ola, daniel";
-    llwrite(fd, data2, 12);
+    llwrite(fd, data2, 11);
     char * data3 = "xau, daniel";
-    llwrite(fd, data3, 12);
-    char * data4 = "AMF, daniel";
-    llwrite(fd, data4, 12);
+    llwrite(fd, data3, 11);
+    char * data4 = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque ultrices leo dui, non pulvinar libero varius vitae. Morbi non nisi lobortis, placerat arcu eget, vestibulum lacus. Sed pretium odio id finibus porttitor. ";
+    DEBUG_PRINT("writing %d bytes.\n", strlen(data4));
+    //printB(data4, 1024);
+    llwrite(fd, data4, strlen(data4));
     llclose();
     tcsetattr(fd,TCSANOW,&oldtio);
     close(fd);
