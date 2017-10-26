@@ -19,6 +19,7 @@ typedef struct{
 } config;
 
 char sendFile(int fd, char * filename);
+char readFile(int fd);
 
 int main(int argc, char **argv){
 	struct termios oldtio,newtio;
@@ -80,13 +81,29 @@ int main(int argc, char **argv){
 	    return -1;
     }
 
-    printf("Ready to send\n");
+		int result;
 
-		char result = sendFile(cfg.fd_port, argv[1]);
+		if (stat == 1){
+	    printf("Ready to send\n");
+			result = sendFile(cfg.fd_port, argv[1]);
+		} else{
+			printf("Ready to receive\n");
+			result = readFile(cfg.fd_port);
+		}
+
+		if(result){
+			perror("could not transmit file");
+			return result;
+		}
 
 }
 
 char sendFile(int fd, char * filename){
-	printf("sending file %s.\n", filename);
+	printf("Sending file %s.\n", filename);
+	return TRUE;
+}
+
+char readFile(int fd){
+	printf("Receiving file.\n");
 	return TRUE;
 }
