@@ -82,7 +82,7 @@ void sendPacket(){
   int sentBytes = 0;
   while(sentBytes != LENGTH){
     sentBytes = write(receiver, packetToSend, LENGTH);
-    printf("sentBytes: %d\n", sentBytes);
+    DEBUG_PRINT("sentBytes: %d\n", sentBytes);
   }
   attempts++;
   if(!DONE){
@@ -107,9 +107,9 @@ void sendWithTimeout(unsigned char * sourcePacket, char expecting, int length){
   packetToSend = (unsigned char *)  malloc(sizeof(unsigned char) * length);
   copyToPacketToSend(sourcePacket, length);
   (void) signal(SIGALRM, sendPacket);  // instala rotina que atende interrupcao
-  printf("Initial alarm has been set\n");
+  DEBUG_PRINT("Initial alarm has been set\n");
   sendPacket();
-  printf("packet has been sent\n");
+  DEBUG_PRINT("packet has been sent\n");
   getCmd(receiver, expecting, TRUE);//True means stop alarm after receiving
   free(packetToSend);
 }
@@ -122,7 +122,7 @@ void llopen(int r){
   receiver = r;
   prepareCmd(SET, C_SET);
   prepareCmd(UA, C_UA);
-  printf("Prepared Set and UA\n");
+  DEBUG_PRINT("Prepared Set and UA\n");
   sendWithTimeout(SET, UA[2], 5);
 }
 
@@ -178,7 +178,7 @@ int llwrite(int receiver, char * data, int size){
 
 int llclose(){
   prepareCmd(DISC, C_DISC);
-  printf("Prepared DISC\n");
+  DEBUG_PRINT("Prepared DISC\n");
   sendWithTimeout(DISC, DISC[2], 5);
   int sentBytes = write(receiver, UA, 5);
   return -1;
