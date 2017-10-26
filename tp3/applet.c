@@ -9,6 +9,7 @@
 #include <signal.h>
 #include <strings.h>
 
+#include "app_r_utils.c"
 #include "defines.h"
 
 typedef struct{
@@ -83,7 +84,7 @@ int main(int argc, char **argv){
 
 		int result;
 
-		if (stat == 1){
+		if (stat == 1){  // Big fork here
 	    printf("Ready to send\n");
 			result = sendFile(cfg.fd_port, argv[1]);
 		} else{
@@ -104,6 +105,25 @@ char sendFile(int fd, char * filename){
 }
 
 char readFile(int fd){
-	printf("Receiving file.\n");
+	printf("[Receiver] Running.\n");
+	
+	int llop=llopen(fd);
+	
+	if(llop!=0){
+		fprintf(stderr, "[R] Could not establish connection.");
+		exit(-1);
+	}
+
+	char* packet;
+	
+	// should get a control packet with the filename and its size.
+	char control_start = get_control_start(fd);
+	
+	if(control_start!=0){
+		exit(-2);
+	}
+
+	
+
 	return TRUE;
 }
