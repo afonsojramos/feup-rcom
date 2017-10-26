@@ -14,11 +14,15 @@ int attempts = 0;
 
 
 void printB(char* str, unsigned n){
-	int i;
+	int i;DEBUG_PRINT(" ");
 	for(i=0;i<n;i++){
-		printf("%x ", (unsigned char) str[i]);
+		#ifdef DEBUG
+			printf("%x ", (unsigned char) str[i]);
+		#endif
 	}
-	printf("\n");
+	#ifdef DEBUG
+		printf("\n");
+	#endif
 }
 
 /**
@@ -31,10 +35,10 @@ void printB(char* str, unsigned n){
 void getCmd(int fd, unsigned char expecting, char stopAlarm){
 	unsigned char readChar;
 	int state = 0;
-  printf("Receiving CMD...\n");
+  DEBUG_PRINT("Receiving CMD...\n");
 	while (state != 5) {       /* loop for input */
   		read(fd, &readChar, 1);   /* returns after 1 char has been input */
-  		printf("read 0x%X state:%d\n", readChar, state);
+  		DEBUG_PRINT("read 0x%X state:%d\n", readChar, state);
   		unsigned char packet_A, packet_C;
   		switch (state){
   			case 0:
@@ -75,10 +79,10 @@ void getCmd(int fd, unsigned char expecting, char stopAlarm){
     DONE = TRUE;
 
     if(stopAlarm){
-			printf("stopped ALARM\n");
+			DEBUG_PRINT("stopped ALARM\n");
       alarm(0);
 	    attempts = 0;//reset the attempt count
     }
-    printf("Received CMD properly\n");
+    DEBUG_PRINT("Received CMD properly\n");
 
 }

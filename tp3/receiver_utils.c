@@ -74,8 +74,10 @@ char llopen(int fd){
 }
 
 
-int llread(int fd, char* dest){
-	DEBUG_PRINT("[DEBUG] Entered llread.\n");
+int llread(int fd, char** remote_dest){
+	char* dest=*remote_dest;
+
+	DEBUG_PRINT("Entered llread.\n");
 	int rsf=0; // (bytes) read so far
 	int cbs=100; // current buffern size
 
@@ -92,7 +94,7 @@ int llread(int fd, char* dest){
 	while (STOP==0) {       /* loop for input */
 		//printf("waiting for input...\n");
 		read(fd, &c, 1);   /* returns after 1 char has been input */
-		printf("read %x state:%d\n", c, state);
+		DEBUG_PRINT("read %x state:%d\n", c, state);
 		switch (state){
 			case 0:
 				if (c==FLAG){
@@ -124,7 +126,7 @@ int llread(int fd, char* dest){
 
 				if(BCC_OK){
 					state=4;
-					
+
 				}else
 					state=0;
 			break;
@@ -152,7 +154,7 @@ int llread(int fd, char* dest){
 
 				if(BCC_OK){
 					state=6;
-					
+
 				}else
 					state=0;
 			break;
@@ -162,7 +164,10 @@ int llread(int fd, char* dest){
 						STOP=1;
 						sendSU(fd, C_DISC);
 						getCmd(fd, C_UA, FALSE);
+						free(dest);
 						return -6; // signal DISC
+						// Do not attmpt to read from remote_dest after returning,
+						//for it will most certainly not be set.
 					}
 				break;
 
@@ -178,7 +183,7 @@ int llread(int fd, char* dest){
 
 	if(n<0){
 		//The destuff function didn't like the body passed. We should reject.
-		DEBUG_PRINT("[DEBUG] Error occurred during destuffing. Sending C_REJ(%d).\n", comp(c2Bit(packet_C)));
+		DEBUG_PRINT("Error occurred during destuffing. Sending C_REJ(%d).\n", comp(c2Bit(packet_C)));
 		if(comp(c2Bit(packet_C))==0){
 			sendSU(fd, C_REJ0);
 		}else{
@@ -194,7 +199,7 @@ int llread(int fd, char* dest){
 		BCC2^=dest[i];
 	}
 
-	DEBUG_PRINT("[DEBUG] BCC2 test: %x==%x?\n", BCC2, dest[n-1]);
+	DEBUG_PRINT("BCC2 test: %x==%x?\n", BCC2, dest[n-1]);
 	if(BCC2 != dest[n-1]){
 		//BCC2 check failed!
 		DEBUG_PRINT("[DEBUG]\t\t\tFAILED!\n");
@@ -205,15 +210,15 @@ int llread(int fd, char* dest){
 		}
 	}else{
 		// Getting this frame was an absolute success! Acknowledging!
-		DEBUG_PRINT("[DEBUG] sending RR(%d).\n", comp(c2Bit(packet_C)));
+		DEBUG_PRINT("sending RR(%d).\n", comp(c2Bit(packet_C)));
 		if(comp(c2Bit(packet_C))==0){
 			sendSU(fd, C_RR0);
 		}else{
 			sendSU(fd, C_RR1);
 		}
-		
-	}
-	printf("dest: %s\n", dest);
 
+	}
+
+	*remote_dest=dest; // correct the parameter pointer
 	return 0;
 }
