@@ -180,6 +180,9 @@ int llclose(){
   prepareCmd(DISC, C_DISC);
   DEBUG_PRINT("Prepared DISC\n");
   sendWithTimeout(DISC, DISC[2], 5);
-  int sentBytes = write(receiver, UA, 5);
-  return -1;
+  int sentBytes = 0;
+  while(sentBytes != 5){
+    sentBytes = write(receiver, UA, 5);
+  }
+  return 1;
 }
