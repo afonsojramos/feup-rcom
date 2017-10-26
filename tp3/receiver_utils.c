@@ -35,7 +35,7 @@ int destuff(char* str, unsigned int n){
 	0x7e is stuffed to 0x7d 0x5e
 	0x7d is stuffed to 0x7d 0x5d
 	*/
-
+	DEBUG_PRINT("destuffing function got n=%d\n", n);
 	int i,j;
 	for(i=0;i<n;i++){
 		if(str[i]==FLAG_R1){
@@ -59,7 +59,7 @@ int destuff(char* str, unsigned int n){
 			}
 		}
 	}
-
+	DEBUG_PRINT("destuffing function returning n=%d\n", n);
 	return n;
 }
 
@@ -220,5 +220,6 @@ int llread(int fd, char** remote_dest){
 	}
 
 	*remote_dest=dest; // correct the parameter pointer
-	return 0;
+	DEBUG_PRINT("n at end of llread: %d\n", n);
+	return n-1;
 }

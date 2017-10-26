@@ -38,7 +38,7 @@ int main(int argc, char** argv)
 			(strcmp("/dev/ttyS0", argv[1])!=0) &&
   	      	(strcmp("/dev/ttyS1", argv[1])!=0) )
 		)
-	{
+	   {
       printf("Usage:\tnserial SerialPort\n\tex: nserial /dev/ttyS1\n");
       exit(1);
     }
@@ -83,9 +83,9 @@ int main(int argc, char** argv)
       exit(-1);
     }
 
-    //printf("New termios structure set\n");
+  DEBUG_PRINT("New termios structure set\n");
 
-	char ret=llopen(fd);
+	int ret=llopen(fd);
 	printf("llopen returned %d.\n", ret);
 
 	char* receive=NULL;
@@ -95,11 +95,17 @@ int main(int argc, char** argv)
 		if(ret==-6){
 			DEBUG_PRINT("connection closed by remote host.\n");
 		}else{
-      printf("%s\n", receive);
+      int j;
+      DEBUG_PRINT("got n=%d\n", ret);
+      for(j=0;j<ret;j++){
+        printf("%c", receive[j]);
+      }
+      printf("\n");
       free(receive);
     }
-
 	}
+
+
 
     tcsetattr(fd,TCSANOW,&oldtio);
     close(fd);
