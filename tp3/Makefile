@@ -9,6 +9,9 @@ receiver_task: receiver.c utils
 sender_task: sender.c utils
 	$(CC) sender.c -o sender $(CFLAGS)
 
+applet_sender_task: applet.c utils
+	$(CC) applet.c -o applet $(CFLAGS)
+
 
 utils: utils.c
 	$(CC) utils.c -c -o utils.o -Wall
@@ -16,6 +19,7 @@ utils: utils.c
 clean:
 	rm receiver
 	rm sender
+	rm applet
 
 runR: receiver_task
 	clear
@@ -24,3 +28,7 @@ runR: receiver_task
 runS: sender_task
 	clear
 	./sender /dev/ttyS0
+
+runP: applet_sender_task
+	clear
+	./applet pinguim.gif
