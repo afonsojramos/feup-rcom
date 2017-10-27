@@ -20,13 +20,14 @@ char get_control(int fd, rfile* rf){
     char state=0, STOP=0;
     int i=-1;
     char control;
-    rf.size=0;
-    rf.name=NULL;
+    rf->size=0;
+    rf->name=NULL;
     while(!STOP){
       i++; //increment packet byte iterator
       if(i>ret){ // if we try to read beyond the end of the packet returned by llread, then something is wrong.
         //TODO care comment above
       }
+      unsigned char l;
       switch(state){
         case 0:
           if(packet[i]!=2 && packet[i]!=3){
@@ -51,21 +52,22 @@ char get_control(int fd, rfile* rf){
         break;
         case 2: // FILE SIZE
           //we shold be getting a length here.
-          unsigned char l=packet[i];
-          unsigned char ltemp=l;
+          l = packet[i];
+          unsigned char ltemp = l;
 
           for(int j=0;j<l;j++){
-            rf.size |= ( packet[++i] << (ltemp*8)); // TODO TEST THIS VERY THOUROULY
+            rf->size |= ( packet[++i] << (ltemp*8)); // TODO TEST THIS VERY THOUROULY
           }
           state=1;
         break;
-        case 2: // FILE NAME
+        case 3: // FILE NAME
           //we shold be getting a length here.
-          unsigned char l=packet[i];
+          ;
+          l = packet[i];
 
-          rf.name=malloc(sizeof(char)*(l+1));
+          rf->name=malloc(sizeof(char)*(l+1));
           for(int j=0;j<l;j++){
-            rf.name[j]=packet[++i]; // copy file name to rf.name
+            rf->name[j]=packet[++i]; // copy file name to rf.name
           }
           state=1;
         break;

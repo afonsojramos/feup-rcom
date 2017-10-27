@@ -114,8 +114,6 @@ char readFile(int fd){
 		exit(-1);
 	}
 
-	char* packet;
-
 	// should get a control packet with the filename and its size.
 	rfile received;
 	char control = get_control(fd, &received);

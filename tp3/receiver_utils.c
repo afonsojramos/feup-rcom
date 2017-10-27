@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <assert.h>
+#include "utils.c"
 
 #define c2Bit(x)	(x&0b01000000)>>6
 
