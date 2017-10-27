@@ -106,24 +106,26 @@ char sendFile(int fd, char * filename){
 
 char readFile(int fd){
 	printf("[Receiver] Running.\n");
-	
+
 	int llop=llopen(fd);
-	
+
 	if(llop!=0){
 		fprintf(stderr, "[R] Could not establish connection.");
 		exit(-1);
 	}
 
 	char* packet;
-	
+
 	// should get a control packet with the filename and its size.
-	char control_start = get_control_start(fd);
-	
-	if(control_start!=0){
+	rfile received;
+	char control = get_control(fd, &received);
+
+	if(control!=2){
+		fprintf(stderr, "[R] Didn't get a START CONTROL PACKET when expected.");
 		exit(-2);
 	}
 
-	
+
 
 	return TRUE;
 }
