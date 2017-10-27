@@ -224,3 +224,8 @@ int llread(int fd, char** remote_dest){
 	DEBUG_PRINT("n at end of llread: %d\n", n);
 	return n-1;
 }
+
+
+unsigned char llclose(){
+	return 0;
+}

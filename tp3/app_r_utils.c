@@ -3,11 +3,30 @@
 #include "receiver_utils.c"
 
 typedef struct{
+  // if control packet, these are used:
   char* name;
   unsigned int size;
+  //break;
+  // if data packet, these are used:
+  char* content;
+  unsigned char nSeq;
+  unsigned int cSize;
+
 } rfile;
 
-char get_control(int fd, rfile* rf){
+ 
+/* getPacket
+Returns valueable info:
+ 1 - data packet
+ 2 - start packet
+ 3 - end packet.
+
+Additionally, return data on the passed variable, rfile* rf:
+    if ret==1, then rf->content will be filled with the data packet's content, and should be freed later.
+    else, rf->name will be filled with the file's name, and should be freed. The file's size will also be written to rf->size
+*/
+
+char getPacket(int fd, rfile* rf){
     char* packet;
 
     int ret=llread(fd, &packet);
@@ -30,11 +49,15 @@ char get_control(int fd, rfile* rf){
       unsigned char l;
       switch(state){
         case 0:
-          if(packet[i]!=2 && packet[i]!=3){
+          if(packet[i]!=2 && packet[i]!=3 && packet[i]!=1){
             return -1; // not a control packet.
           }else{
             control=packet[i];
-            state=1;
+            if(packet[i]==1){ // data packet incoming
+              state=4;
+            }else{
+              state=1;
+            }
           }
         break;
         case 1:
@@ -70,6 +93,19 @@ char get_control(int fd, rfile* rf){
             rf->name[j]=packet[++i]; // copy file name to rf.name
           }
           state=1;
+        break;
+        case 4:
+          rf->nSeq=packet[i]; // get N field of packet and store.
+          char tempL2=packet[++i];
+          rf->cSize=tempL2*256+packet[++i];
+          rf->content=malloc(sizeof(char)*rf->cSize);
+          int j;
+          for(j=0;j<rf->cSize;j++){
+            rf->content[j]=packet[++i];
+          }
+
+          assert(i==ret); // should be.
+          // TODO test this
         break;
       }
     }

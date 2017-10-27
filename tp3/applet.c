@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <signal.h>
 #include <strings.h>
+#include <assert.h> // should be removed after all asserts have been tested.
 
 #include "app_r_utils.c"
 #include "defines.h"
@@ -116,13 +117,38 @@ char readFile(int fd){
 
 	// should get a control packet with the filename and its size.
 	rfile received;
-	char control = get_control(fd, &received);
+	char control = getPacket(fd, &received);
 
-	if(control!=2){
+	if(control!=2){ // 2 is START
 		fprintf(stderr, "[R] Didn't get a START CONTROL PACKET when expected.");
 		exit(-2);
 	}
 
+	// let's prepare the way for that file we'll receive.
+
+	printf("[R] Receiving file %s. It is %d bytes long.\n", received.name, received.size);
+	FILE *f;
+	f = fopen(received.name, "w");
+
+	//we can get rid of the name now.
+	free(received.name);
+
+	// now, we should get the file.
+
+	char gpRet=0;
+	do{
+		gpRet=getPacket(fd, &received);
+		fwrite(received.content, received.cSize, 1, f);
+		free(received.content);
+	} while(gpRet!=3);
+
+	//we got here, so we most certainly got a CONTROL END PACKET
+	//we could check if the file size is what it is supposed to be.
+
+	assert(ftell(f) == received.size);
+	fclose(f);
+
+	llclose();
 
 
 	return TRUE;
