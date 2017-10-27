@@ -1,6 +1,9 @@
 CC=gcc
 CFLAGS=-Wall -g -DDEBUG -std=c11
 
+
+app: applet_task
+
 all: receiver_task sender_task
 
 receiver_task: receiver.c utils
@@ -9,7 +12,7 @@ receiver_task: receiver.c utils
 sender_task: sender.c utils
 	$(CC) sender.c -o sender $(CFLAGS)
 
-applet_sender_task: applet.c utils
+applet_task: applet.c utils
 	$(CC) applet.c -o applet $(CFLAGS)
 
 
