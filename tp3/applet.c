@@ -134,7 +134,7 @@ char readFile(int fd){
 	char control = getPacket(fd, &received);
 
 	if(control!=2){ // 2 is START
-		fprintf(stderr, "[R] Didn't get a START CONTROL PACKET when expected.");
+		fprintf(stderr, "[R] Didn't get a START CONTROL PACKET when expected.\n Got %d instead of 2.\n", control);
 		exit(-2);
 	}
 

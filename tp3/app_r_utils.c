@@ -30,8 +30,10 @@ char getPacket(int fd, rfile* rf){
     char* packet;
 
     int ret=llreadR(fd, &packet);
+    DEBUG_PRINT("[R] llreadR just returned. Printing packet:\n");
 
-    if(ret!=0){
+    printB(packet, ret);
+    if(ret<0){
       return -1; // Something went wrong with the llread.
     }
 
@@ -44,13 +46,15 @@ char getPacket(int fd, rfile* rf){
     while(!STOP){
       i++; //increment packet byte iterator
       if(i>ret){ // if we try to read beyond the end of the packet returned by llread, then something is wrong.
-        //TODO care comment above
+        DEBUG_PRINT("I HIT THE TODO!!\n");
+        return control;
       }
       unsigned char l;
       switch(state){
         case 0:
           if(packet[i]!=2 && packet[i]!=3 && packet[i]!=1){
-            return -1; // not a control packet.
+            DEBUG_PRINT("[R] packet is not a control packet. Exiting... \n");
+            return packet[i]; // not a control packet.
           }else{
             control=packet[i];
             if(packet[i]==1){ // data packet incoming
@@ -61,6 +65,7 @@ char getPacket(int fd, rfile* rf){
           }
         break;
         case 1:
+          DEBUG_PRINT("[R] reading T byte. i is %d, currentByte is %x\n", i, packet[i]);
           // here we read a T (type) byte, or nothing
           if(i==ret){ // end of packet.
             return control;
@@ -70,18 +75,24 @@ char getPacket(int fd, rfile* rf){
           }else if(packet[i]==1){ // reading file name next.
             state=3;
           }else{ // undefined behaviour here
-            return -2; // received unknown Type packet.
+            return -5; // received unknown Type packet.
           }
         break;
         case 2: // FILE SIZE
           //we shold be getting a length here.
-          l = packet[i];
+          l = packet[i++];
           char sizeStr[10];
-          for(int j=0;j<l;j++){
+          int j;
+          for(j=0;j<=l;j++){
             sizeStr[j]=packet[i++];
           }
-          sizeStr[++i]='\0'; // null terminator in string
+          sizeStr[j-1]='\0'; // null terminator in string
+          DEBUG_PRINT("%s\n", sizeStr);
+          //exit(-100);
+          printB(sizeStr, l);
           rf->size=atoi(sizeStr);
+          i-=2; // trolhisse
+          DEBUG_PRINT("[R] Just read file size=%d. i is %d\n", rf->size, i);
           state=1;
         break;
         case 3: // FILE NAME
@@ -93,6 +104,8 @@ char getPacket(int fd, rfile* rf){
           for(int j=0;j<l;j++){
             rf->name[j]=packet[++i]; // copy file name to rf.name
           }
+          DEBUG_PRINT("l is %d.\n", l);
+          rf->name[l]='\0';
           state=1;
         break;
         case 4:
@@ -100,8 +113,7 @@ char getPacket(int fd, rfile* rf){
           char tempL2=packet[++i];
           rf->cSize=tempL2*256+packet[++i];
           rf->content=malloc(sizeof(char)*rf->cSize);
-          int j;
-          for(j=0;j<rf->cSize;j++){
+          for(int j=0;j<rf->cSize;j++){
             rf->content[j]=packet[++i];
           }
 
