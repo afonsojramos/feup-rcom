@@ -107,15 +107,36 @@ char sendFile(int fd, char * filename){
 	FILE* f=fopen(filename, "r");
 
 	//get file size
-	unsigned int fSize = fseek(f, 0, SEEK_END);
+	unsigned int fSize;
+	fseek(f, 0, SEEK_END);
 	fSize=ftell(f);
+	rewind(f);
 	printf("[S] File to send is %d bytes long.\n", fSize);
-
 
 	//open connection
 	llopenS(fd);
 
-	sendControl(fd, TRUE, filename, fSize);
+	sendControl(fd, TRUE, filename, fSize); // true for start
+
+	// we will be using 512bytes packets.
+	int STOP=0;
+	while(!STOP){
+		char bytes[512];
+		unsigned int bytesRead=fread(bytes, 512, 1, f);
+		sendData(fd, bytes, bytesRead);
+		if(bytesRead<512){
+			// we got to the eof.
+			STOP=1;
+		}
+	}
+
+	// the whole file has been sent. Sending CONTROL END PACKET
+
+	sendControl(fd, FALSE, filename, fSize); // false for END
+
+
+
+
 	return TRUE;
 }
 
@@ -134,7 +155,7 @@ char readFile(int fd){
 	char control = getPacket(fd, &received);
 
 	if(control!=2){ // 2 is START
-		fprintf(stderr, "[R] Didn't get a START CONTROL PACKET when expected.\n Got %d instead of 2.\n", control);
+		fprintf(stderr, "[R] Didn't get a START CONTROL PACKET when expected.");
 		exit(-2);
 	}
 
