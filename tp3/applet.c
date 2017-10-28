@@ -122,11 +122,11 @@ char sendFile(int fd, char * filename){
 	int STOP=0;
 	while(!STOP){
 		char bytes[512];
-		unsigned int bytesRead=fread(bytes, 1, 15, f);
+		unsigned int bytesRead=fread(bytes, 1, 128, f);
 		DEBUG_PRINT("[S] Sending %d bytes.\n", bytesRead);
 		sendData(fd, bytes, bytesRead);
 		//exit(-1);
-		if(bytesRead<15){
+		if(bytesRead<128){
 			// we got to the eof.
 			STOP=1;
 		}
@@ -187,6 +187,7 @@ char readFile(int fd){
 	// we got here, so we most certainly got a CONTROL END PACKET
 	// we could check if the file size is what it is supposed to be.
 
+	free(received.name);
 	DEBUG_PRINT("ftell(f): %lu vs received.size: %d\n", ftell(f), received.size);
 	assert(ftell(f) == received.size);
 	fclose(f);

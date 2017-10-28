@@ -47,6 +47,7 @@ char getPacket(int fd, rfile* rf){
       i++; //increment packet byte iterator
       if(i>ret-1){ // if we try to read beyond the end of the packet returned by llread, then something is wrong.
         DEBUG_PRINT("I HIT THE TODO!!\n");
+		free(packet);
         return control;
       }
       unsigned char l;
