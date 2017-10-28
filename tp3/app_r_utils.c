@@ -14,7 +14,7 @@ typedef struct{
 
 } rfile;
 
- 
+
 /* getPacket
 Returns valueable info:
  1 - data packet
@@ -76,12 +76,11 @@ char getPacket(int fd, rfile* rf){
         case 2: // FILE SIZE
           //we shold be getting a length here.
           l = packet[i];
-          unsigned char ltemp = l;
           char sizeStr[10];
           for(int j=0;j<l;j++){
             sizeStr[j]=packet[i++];
           }
-          sizeStr[++j]='\0'; // null terminator in string
+          sizeStr[++i]='\0'; // null terminator in string
           rf->size=atoi(sizeStr);
           state=1;
         break;

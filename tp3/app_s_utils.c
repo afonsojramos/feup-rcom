@@ -3,10 +3,9 @@
 #include "sender_utils.c"
 
 
-unsigned char sendControl(int fd, unsigned char start, char *fileName, unsigned int fileSize)
+int sendControl(int fd, unsigned char start, char *fileName, unsigned int fileSize)
 {
-    unsigned char bytes[600]; // controlPackets should never be bigger than 1+2*(1+255)=513 bytes
-    char control;
+    char bytes[600]; // controlPackets should never be bigger than 1+2*(1+255)=513 bytes
     if(start==TRUE){
         bytes[0]=2; // START CONTROL PACKET
     }else{
@@ -18,7 +17,7 @@ unsigned char sendControl(int fd, unsigned char start, char *fileName, unsigned 
 
     sprintf(sizeStr, "%d", fileSize);
 
-    unsigned char len; // this will be used to hold strlens 
+    unsigned char len; // this will be used to hold strlens
 
     len=strlen(sizeStr);
     bytes[2]=len; // pass file size string length here
