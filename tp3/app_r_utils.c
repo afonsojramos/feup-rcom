@@ -113,8 +113,9 @@ char getPacket(int fd, rfile* rf){
         break;
         case 4:
           rf->nSeq=packet[i]; // get N field of packet and store.
-          char tempL2=packet[++i];
-          rf->cSize=tempL2*256+packet[++i];
+          unsigned char tempL2=packet[++i];
+          rf->cSize=tempL2*256+(unsigned char)packet[++i];
+		  DEBUG_PRINT("alloc'ing %d bytes.\n", rf->cSize);
           rf->content=malloc(sizeof(char)*rf->cSize);
           for(int j=0;j<rf->cSize;j++){
             rf->content[j]=packet[++i];
