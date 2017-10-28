@@ -101,14 +101,17 @@ int main(int argc, char **argv){
 }
 
 char sendFile(int fd, char * filename){
-	printf("Sending file %s.\n", filename);
+	printf("[Sender] Running.\n[S] Sending %s.\n", filename);
+
+
+
 	return TRUE;
 }
 
 char readFile(int fd){
 	printf("[Receiver] Running.\n");
 
-	int llop=llopen(fd);
+	int llop=llopenR(fd);
 
 	if(llop!=0){
 		fprintf(stderr, "[R] Could not establish connection.");
@@ -142,13 +145,13 @@ char readFile(int fd){
 		free(received.content);
 	} while(gpRet!=3);
 
-	//we got here, so we most certainly got a CONTROL END PACKET
-	//we could check if the file size is what it is supposed to be.
+	// we got here, so we most certainly got a CONTROL END PACKET
+	// we could check if the file size is what it is supposed to be.
 
 	assert(ftell(f) == received.size);
 	fclose(f);
 
-	llclose();
+	llcloseR(); // this might not be necessary. We'll see
 
 
 	return TRUE;

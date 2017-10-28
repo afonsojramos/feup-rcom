@@ -29,7 +29,7 @@ Additionally, return data on the passed variable, rfile* rf:
 char getPacket(int fd, rfile* rf){
     char* packet;
 
-    int ret=llread(fd, &packet);
+    int ret=llreadR(fd, &packet);
 
     if(ret!=0){
       return -1; // Something went wrong with the llread.

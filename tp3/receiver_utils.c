@@ -64,7 +64,7 @@ int destuff(char* str, unsigned int n){
 	return n;
 }
 
-char llopen(int fd){
+char llopenR(int fd){
 	getCmd(fd, C_SET, FALSE); //TODO: make C_SET a thing
 
 	int retUA=sendSU(fd, C_UA);//TODO: make this accessible
@@ -75,7 +75,7 @@ char llopen(int fd){
 }
 
 
-int llread(int fd, char** remote_dest){
+int llreadR(int fd, char** remote_dest){
 	char* dest=*remote_dest;
 
 	DEBUG_PRINT("Entered llread.\n");
@@ -226,6 +226,6 @@ int llread(int fd, char** remote_dest){
 }
 
 
-unsigned char llclose(){
+unsigned char llcloseR(){
 	return 0;
 }
