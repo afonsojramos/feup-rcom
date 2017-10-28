@@ -11,6 +11,7 @@
 #include <assert.h> // should be removed after all asserts have been tested.
 
 #include "app_r_utils.c"
+#include "app_s_utils.c"
 #include "defines.h"
 
 typedef struct{
@@ -107,10 +108,11 @@ char sendFile(int fd, char * filename){
 
 	//get file size
 	unsigned int fSize = fseek(f, 0, SEEK_END);
+	fSize=ftell(f);
 	printf("[S] File to send is %d bytes long.\n", fSize);
 
 
-	//open connection 
+	//open connection
 	llopenS(fd);
 
 	sendControl(fd, TRUE, filename, fSize);
