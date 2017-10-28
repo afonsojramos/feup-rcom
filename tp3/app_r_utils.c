@@ -80,16 +80,24 @@ char getPacket(int fd, rfile* rf){
         break;
         case 2: // FILE SIZE
           //we shold be getting a length here.
+<<<<<<< HEAD
           l = packet[i++];
+=======
+          l = packet[i];
+>>>>>>> 72e6dedb7b7fa971b4492b7db10d9a23bdc5faf8
           char sizeStr[10];
           int j;
           for(j=0;j<=l;j++){
             sizeStr[j]=packet[i++];
           }
+<<<<<<< HEAD
           sizeStr[j-1]='\0'; // null terminator in string
           DEBUG_PRINT("%s\n", sizeStr);
           //exit(-100);
           printB(sizeStr, l);
+=======
+          sizeStr[++i]='\0'; // null terminator in string
+>>>>>>> 72e6dedb7b7fa971b4492b7db10d9a23bdc5faf8
           rf->size=atoi(sizeStr);
           i-=2; // trolhisse
           DEBUG_PRINT("[R] Just read file size=%d. i is %d\n", rf->size, i);
