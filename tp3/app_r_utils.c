@@ -86,13 +86,13 @@ char getPacket(int fd, rfile* rf){
           char sizeStr[10];
           int j;
           for(j=0;j<=l;j++){
-            sizeStr[j]=packet[i++];
+            sizeStr[j]=packet[++i];
           }
 
-          sizeStr[++i]='\0'; // null terminator in string
-
+          sizeStr[l]='\0'; // null terminator in string
+          DEBUG_PRINT("l: %d, str: %s\n", l, sizeStr);
           rf->size=atoi(sizeStr);
-          i-=2; // trolhisse
+          i--; // trolhisse
           DEBUG_PRINT("[R] Just read file size=%d. i is %d\n", rf->size, i);
           state=1;
         break;
