@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-Wall -g -std=c11# -DDEBUG
+CFLAGS=-Wall -g -std=c11 -DDEBUG
 
 
 app: applet_task
