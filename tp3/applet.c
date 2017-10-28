@@ -171,15 +171,21 @@ char readFile(int fd){
 	// now, we should get the file.
 
 	char gpRet=0;
-	do{
+	while(1){
 		gpRet=getPacket(fd, &received);
-		fwrite(received.content, received.cSize, 1, f);
+		if(gpRet==3)
+			break;
+		DEBUG_PRINT("writting %d bytes to file.\n", received.cSize);
+		printB(received.content, received.cSize);
+		fwrite(received.content, 1, received.cSize, f);
 		free(received.content);
-	} while(gpRet!=3);
+		fflush(f);
+	}
 
 	// we got here, so we most certainly got a CONTROL END PACKET
 	// we could check if the file size is what it is supposed to be.
 
+	DEBUG_PRINT("ftell(f): %lu vs received.size: %d\n", ftell(f), received.size);
 	assert(ftell(f) == received.size);
 	fclose(f);
 

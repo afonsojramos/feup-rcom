@@ -45,7 +45,7 @@ char getPacket(int fd, rfile* rf){
     rf->name=NULL;
     while(!STOP){
       i++; //increment packet byte iterator
-      if(i>ret){ // if we try to read beyond the end of the packet returned by llread, then something is wrong.
+      if(i>ret-1){ // if we try to read beyond the end of the packet returned by llread, then something is wrong.
         DEBUG_PRINT("I HIT THE TODO!!\n");
         return control;
       }
@@ -59,6 +59,7 @@ char getPacket(int fd, rfile* rf){
             control=packet[i];
             if(packet[i]==1){ // data packet incoming
               state=4;
+              //ret++;
             }else{
               state=1;
             }
@@ -117,8 +118,8 @@ char getPacket(int fd, rfile* rf){
           for(int j=0;j<rf->cSize;j++){
             rf->content[j]=packet[++i];
           }
-
-          assert(i==ret); // should be.
+          DEBUG_PRINT("assert bellow!! i: %d, ret: %d\n", i, ret-1);
+          assert(i==ret-1); // should be.
           // TODO test this
         break;
       }

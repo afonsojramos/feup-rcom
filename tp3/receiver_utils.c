@@ -88,14 +88,14 @@ int llreadR(int fd, char** remote_dest){
 		perror("malloc");
 	}
 	/* Begin state machine */
-	char c;
+	unsigned char c;
 	int state=0;
-	int BCC_OK, STOP=0;
+	unsigned char BCC_OK, STOP=0;
 	char packet_A, packet_C;
 	while (STOP==0) {       /* loop for input */
 		//printf("waiting for input...\n");
 		read(fd, &c, 1);   /* returns after 1 char has been input */
-		DEBUG_PRINT("read %x state:%d\n", c, state);
+		//DEBUG_PRINT("read %x state:%d\n", c, state);
 		switch (state){
 			case 0:
 				if (c==FLAG){
@@ -200,10 +200,10 @@ int llreadR(int fd, char** remote_dest){
 		BCC2^=dest[i];
 	}
 
-	DEBUG_PRINT("BCC2 test: %x==%x?\n", BCC2, dest[n-1]);
-	if(BCC2 != dest[n-1]){
+	DEBUG_PRINT("BCC2 test: %x==%x?\n", BCC2, (unsigned char) dest[n-1]);
+	if(BCC2 !=  (unsigned char) dest[n-1]){
 		//BCC2 check failed!
-		DEBUG_PRINT("[DEBUG]\t\t\tFAILED!\n");
+		DEBUG_PRINT("\t\tFAILED!\n");
 		if(comp(c2Bit(packet_C))==0){
 			sendSU(fd, C_REJ0);
 		}else{
@@ -221,7 +221,7 @@ int llreadR(int fd, char** remote_dest){
 	}
 
 	*remote_dest=dest; // correct the parameter pointer
-	DEBUG_PRINT("n at end of llread: %d\n", n);
+	DEBUG_PRINT("n at end of llread: %d\n", n-1); //excluding BCC2
 	return n-1;
 }
 
