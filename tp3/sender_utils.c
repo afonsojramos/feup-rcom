@@ -78,7 +78,7 @@ void sendPacket(){
     printf("TIMEOUT: Failed 3 times, exiting...\n");
     exit(-1);
   }
-  printf("Attempt %d/3:\n", (attempts + 1));
+  DEBUG_PRINT("Attempt %d/3:\n", (attempts + 1));
   int sentBytes = 0;
   while(sentBytes != LENGTH){
     sentBytes = write(receiver, packetToSend, LENGTH);
@@ -164,13 +164,9 @@ int prepareI(char * data, int size, char C){
 * @param receiver a file descriptor for the receiver, already open
 * @return -1 if fails or 1 if it is successful
 */
-int llwriteS(int receiver, char * data, int size){
+	int llwriteS(int receiver, char * data, int size){
   DONE = FALSE;
   int sizeToWrite = prepareI(data, size, CurrentC);//loads the data into global I
-  for(int i = 0; i < sizeToWrite; i++){
-    printf("%X,", I[i]);
-  }
-  printf("\n");
   sendWithTimeout(I, getExpecting(), sizeToWrite);
   complementCS();
   return DONE;

@@ -122,9 +122,11 @@ char sendFile(int fd, char * filename){
 	int STOP=0;
 	while(!STOP){
 		char bytes[512];
-		unsigned int bytesRead=fread(bytes, 512, 1, f);
+		unsigned int bytesRead=fread(bytes, 1, 15, f);
+		DEBUG_PRINT("[S] Sending %d bytes.\n", bytesRead);
 		sendData(fd, bytes, bytesRead);
-		if(bytesRead<512){
+		//exit(-1);
+		if(bytesRead<15){
 			// we got to the eof.
 			STOP=1;
 		}
