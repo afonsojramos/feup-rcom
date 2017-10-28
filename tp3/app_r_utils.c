@@ -77,10 +77,12 @@ char getPacket(int fd, rfile* rf){
           //we shold be getting a length here.
           l = packet[i];
           unsigned char ltemp = l;
-
+          char sizeStr[10];
           for(int j=0;j<l;j++){
-            rf->size |= ( packet[++i] << (ltemp*8)); // TODO TEST THIS VERY THOUROULY
+            sizeStr[j]=packet[i++];
           }
+          sizeStr[++j]='\0'; // null terminator in string
+          rf->size=atoi(sizeStr);
           state=1;
         break;
         case 3: // FILE NAME
