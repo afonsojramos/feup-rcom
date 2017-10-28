@@ -118,7 +118,7 @@ void sendWithTimeout(unsigned char * sourcePacket, char expecting, int length){
 * sends a SET to the receiver, implementing timeouts
 * @param receiver a file descriptor for the receiver, already open
 */
-void llopen(int r){
+void llopenS(int r){
   receiver = r;
   prepareCmd(SET, C_SET);
   prepareCmd(UA, C_UA);
@@ -164,7 +164,7 @@ int prepareI(char * data, int size, char C){
 * @param receiver a file descriptor for the receiver, already open
 * @return -1 if fails or 1 if it is successful
 */
-int llwrite(int receiver, char * data, int size){
+int llwriteS(int receiver, char * data, int size){
   DONE = FALSE;
   int sizeToWrite = prepareI(data, size, CurrentC);//loads the data into global I
   for(int i = 0; i < sizeToWrite; i++){
@@ -176,7 +176,7 @@ int llwrite(int receiver, char * data, int size){
   return DONE;
 }
 
-int llclose(){
+int llcloseS(){
   prepareCmd(DISC, C_DISC);
   DEBUG_PRINT("Prepared DISC\n");
   sendWithTimeout(DISC, DISC[2], 5);

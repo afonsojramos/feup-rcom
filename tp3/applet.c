@@ -103,8 +103,17 @@ int main(int argc, char **argv){
 char sendFile(int fd, char * filename){
 	printf("[Sender] Running.\n[S] Sending %s.\n", filename);
 
+	FILE* f=fopen(filename, "r");
+
+	//get file size
+	unsigned int fSize = fseek(f, 0, SEEK_END);
+	printf("[S] File to send is %d bytes long.\n", fSize);
 
 
+	//open connection 
+	llopenS(fd);
+
+	sendControl(fd, TRUE, filename, fSize);
 	return TRUE;
 }
 
