@@ -32,6 +32,6 @@ runS: sender_task
 	clear
 	./sender /dev/ttyS0
 
-runP: applet_sender_task
+runP: applet_task
 	clear
 	./applet pinguim.gif
