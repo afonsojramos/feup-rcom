@@ -38,3 +38,19 @@ int sendControl(int fd, unsigned char start, char *fileName, unsigned int fileSi
 
     return llwriteS(fd, bytes, currPos);
 }
+
+char sendDataPacket(int fd, char* bytes, unsigned int size){
+    static int seqNum = 0;
+    
+    unsigned char *packet = (unsigned char *) malloc((4+size)*sizeof(char));
+    packet[0] = 0;
+    packet[1] = seqNum++;
+    if(seqNum == 255)
+        seqNum = 0;
+    i
+    packet[2] = (unsigned char) (size >> 8);
+    packet[3] = (unsigned char) size;
+    memcpy((packet+4), buffer, size);
+
+	return llwriteS(fd, packet, size + 4);
+}
