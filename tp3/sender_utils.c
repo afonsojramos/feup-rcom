@@ -30,28 +30,6 @@ void prepareCmd(unsigned char * CMD, unsigned char C){
   CMD[4] = FLAG;
 }
 
-void prepareSet(){ //prepare message to send
-  SET[0] = FLAG;
-  SET[1] = A;
-  SET[2] = C_SET;
-  SET[3] = SET[1] ^ SET[2];
-  SET[4] = FLAG;
-}
-void prepareUA(){ //prepare message to receive, test agains the one the receiver sends
-  UA[0] = FLAG;
-  UA[1] = A;
-  UA[2] = C_UA;
-  UA[3] = UA[1] ^ UA[2];
-  UA[4] = FLAG;
-}
-void prepareDISC(){ //prepare message to receive, test agains the one the receiver sends
-  DISC[0] = FLAG;
-  DISC[1] = A;
-  DISC[2] = C_DISC;
-  DISC[3] = DISC[1] ^ DISC[2];
-  DISC[4] = FLAG;
-}
-
 char getExpecting(){
   if(CurrentC == C_S0){
     return C_RR1;
