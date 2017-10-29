@@ -21,6 +21,7 @@ extern int attempts;
 int receiver;
 unsigned char * I;//trama de informacao a enviar
 char CurrentC = C_S0;//the first C sent is C_S0, it will then change on each iteration
+char CurrentREJ = C_REJ0;//the first REJ received is C_REJ1, it will then change on each iteration
 
 void prepareCmd(unsigned char * CMD, unsigned char C){
   CMD[0] = FLAG;
@@ -35,6 +36,13 @@ char getExpecting(){
     return C_RR1;
   }else{
     return C_RR0;
+  }
+}
+char getExpectingRej(){
+  if(CurrentC == C_S0){
+    return C_REJ1;
+  }else{
+    return C_REJ0;
   }
 }
 
@@ -87,8 +95,25 @@ void sendWithTimeout(unsigned char * sourcePacket, char expecting, int length){
   (void) signal(SIGALRM, sendPacket);  // instala rotina que atende interrupcao
   DEBUG_PRINT("Initial alarm has been set\n");
   sendPacket();
-  DEBUG_PRINT("packet has been sent\n");
+  DEBUG_PRINT("Packet has been sent\n");
   getCmd(receiver, expecting, TRUE);//True means stop alarm after receiving
+  free(packetToSend);
+}
+
+//send I with timeout, but exepcting RR or REJ, and acting accordingly
+void sendIpacketWithTimeout(unsigned char * sourcePacket, int length){
+  //preparing packet only happens once
+  packetToSend = (unsigned char *)  malloc(sizeof(unsigned char) * length);
+  copyToPacketToSend(sourcePacket, length);
+  unsigned char readChar = getExpectingRej();//used to verify the receiver response
+  do{
+    (void) signal(SIGALRM, sendPacket);  // instala rotina que atende interrupcao
+    DEBUG_PRINT("Initial alarm has been set\n");
+    sendPacket();
+    DEBUG_PRINT("Packet has been sent\n");
+    DEBUG_PRINT("Receiving either RR or REJ:\n");
+    readChar = getCmdExpectingTwo(receiver, getExpecting(), getExpectingRej(), TRUE);//True means stop alarm after receiving
+  }while(readChar == getExpectingRej());//while rej is received, resend the
   free(packetToSend);
 }
 
@@ -142,10 +167,10 @@ int prepareI(char * data, int size, char C){
 * @param receiver a file descriptor for the receiver, already open
 * @return -1 if fails or 1 if it is successful
 */
-	int llwriteS(int receiver, char * data, int size){
+int llwriteS(int receiver, char * data, int size){
   DONE = FALSE;
   int sizeToWrite = prepareI(data, size, CurrentC);//loads the data into global I
-  sendWithTimeout(I, getExpecting(), sizeToWrite);
+  sendIpacketWithTimeout(I, sizeToWrite);
   complementCS();
   return DONE;
 }
