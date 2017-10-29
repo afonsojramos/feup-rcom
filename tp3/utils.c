@@ -51,6 +51,8 @@ void getCmd(int fd, unsigned char expecting, char stopAlarm){
   				packet_A=readChar; // we received the byte A, here. Storing.
   				if(readChar==A)
   					state = 2;
+					else if(readChar == FLAG)
+						state = 1;
   				else
   					state = 0;
   			break;
@@ -116,6 +118,8 @@ unsigned char getCmdExpectingTwo(int fd, unsigned char expecting1, unsigned char
   				packet_A=readChar; // we received the byte A, here. Storing.
   				if(readChar==A)
   					state = 2;
+					else if(readChar == FLAG)
+						state = 1;
   				else
   					state = 0;
   			break;
@@ -146,9 +150,9 @@ unsigned char getCmdExpectingTwo(int fd, unsigned char expecting1, unsigned char
     DONE = TRUE;
 
     if(stopAlarm){
-		DEBUG_PRINT("stopped ALARM\n");
-		alarm(0);
-		attempts = 0;//reset the attempt count
+			DEBUG_PRINT("stopped ALARM\n");
+			alarm(0);
+			attempts = 0;//reset the attempt count
     }
 	DEBUG_PRINT("Received Double expecting CMD properly: 0x%X\n", matchExpected);
 	return matchExpected;

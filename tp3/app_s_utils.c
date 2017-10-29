@@ -45,8 +45,8 @@ char sendData(int fd, char* bytes, unsigned int size){
     char *packet = (char *) malloc((4+size)*sizeof(char));
     packet[0] = 1;
     packet[1] = seqNum++;
-	DEBUG_PRINT("[S] Current seqNum is %d.\n", seqNum);
-    if(seqNum == 255)
+	  DEBUG_PRINT("[S] Current seqNum is %d.\n", seqNum);
+    if(seqNum == 256)
         seqNum = 0;
     packet[2] = (unsigned char) (size >> 8);
     packet[3] = (unsigned char) size;

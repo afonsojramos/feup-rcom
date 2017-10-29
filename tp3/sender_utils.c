@@ -113,6 +113,10 @@ void sendIpacketWithTimeout(unsigned char * sourcePacket, int length){
     DEBUG_PRINT("Packet has been sent\n");
     //Receiving either RR or REJ
     readChar = getCmdExpectingTwo(receiver, getExpecting(), getExpectingRej(), TRUE);//True means stop alarm after receiving
+    if(readChar == getExpectingRej()){
+      printf("\n\n\n\n\n\n\n\n\n\n\n\n--------------------REJ-----------------------\n\n\n\n\n\n\n\n\n\n\n\n");
+      sleep(5);
+    }
   }while(readChar == getExpectingRej());//while rej is received, resend the
   free(packetToSend);
 }
