@@ -59,6 +59,7 @@ void complementCS(){
 * the global variable char[5] packetToSend must be loaded
 */
 void sendPacket(){
+  (void) signal(SIGALRM, sendPacket);  // instala rotina que atende interrupcao
   DONE = FALSE;
   if(attempts == 3){
     printf("TIMEOUT: Failed 3 times, exiting...\n");
@@ -92,7 +93,6 @@ void copyToPacketToSend(unsigned char * sourcePacket, int length){
 void sendWithTimeout(unsigned char * sourcePacket, char expecting, int length){
   packetToSend = (unsigned char *)  malloc(sizeof(unsigned char) * length);
   copyToPacketToSend(sourcePacket, length);
-  (void) signal(SIGALRM, sendPacket);  // instala rotina que atende interrupcao
   DEBUG_PRINT("Initial alarm has been set\n");
   sendPacket();
   DEBUG_PRINT("Packet has been sent\n");
@@ -107,15 +107,13 @@ void sendIpacketWithTimeout(unsigned char * sourcePacket, int length){
   copyToPacketToSend(sourcePacket, length);
   unsigned char readChar = getExpectingRej();//used to verify the receiver response
   do{
-    (void) signal(SIGALRM, sendPacket);  // instala rotina que atende interrupcao
     DEBUG_PRINT("Initial alarm has been set\n");
     sendPacket();
     DEBUG_PRINT("Packet has been sent\n");
     //Receiving either RR or REJ
     readChar = getCmdExpectingTwo(receiver, getExpecting(), getExpectingRej(), TRUE);//True means stop alarm after receiving
     if(readChar == getExpectingRej()){
-      printf("\n\n\n\n\n\n\n\n\n\n\n\n--------------------REJ-----------------------\n\n\n\n\n\n\n\n\n\n\n\n");
-      sleep(5);
+      DEBUG_PRINT("\n\n\n\n\n\n\n\n\n\n\n\n--------------------REJ-----------------------\n\n\n\n\n\n\n\n\n\n\n\n");
     }
   }while(readChar == getExpectingRej());//while rej is received, resend the
   free(packetToSend);
