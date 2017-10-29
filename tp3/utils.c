@@ -35,7 +35,7 @@ void printB(char* str, unsigned n){
 void getCmd(int fd, unsigned char expecting, char stopAlarm){
 	unsigned char readChar;
 	int state = 0;
-  DEBUG_PRINT("Receiving CMD...\n");
+	DEBUG_PRINT("Receiving CMD...\n");
 	while (state != 5) {       /* loop for input */
   		read(fd, &readChar, 1);   /* returns after 1 char has been input */
   		DEBUG_PRINT("read 0x%X state:%d\n", readChar, state);
