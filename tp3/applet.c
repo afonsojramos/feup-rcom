@@ -24,18 +24,14 @@ typedef struct{
 char sendFile(int fd, char * filename);
 char readFile(int fd);
 
+void progressInit();
+void progressEnd();
 void displayProgress(unsigned int currentSize, unsigned int totalSize);
 
 
 int main(int argc, char **argv){
 	struct termios oldtio,newtio;
   config cfg = { .fd_port = 0, .fd_file_send = 0, .fd_file_create = 0};
-
-	/*fflush(stdout);
-	int total = 200000;
-	for(int i = 0; i < total; i++){
-		displayProgress(i, total);
-	}*/
 
 	printf("Sender(1) or Receiver(0)?\n");
 	int stat;
@@ -132,20 +128,28 @@ char sendFile(int fd, char * filename){
 
 	sendControl(fd, TRUE, filename, fSize); // true for start
 
+	progressInit();
+
 	// we will be using 512bytes packets.
 	int STOP=0;
+	unsigned int accumulator = 0;
 	while(!STOP){
 		char bytes[FRAME_SIZE];
 		unsigned int bytesRead=fread(bytes, 1, FRAME_SIZE, f);
 		DEBUG_PRINT("[S] Sending %d bytes.\n", bytesRead);
 		sendData(fd, bytes, bytesRead);
-		//exit(-1);
+
+#ifndef DEBUG
+		accumulator+=bytesRead;
+		displayProgress(accumulator, fSize);
+#endif
+
 		if(bytesRead<FRAME_SIZE){
 			// we got to the eof.
 			STOP=1;
 		}
 	}
-
+	progressEnd();
 	// the whole file has been sent. Sending CONTROL END PACKET
 
 	sendControl(fd, FALSE, filename, fSize); // false for END
@@ -215,22 +219,28 @@ char readFile(int fd){
 	return TRUE;
 }
 
+void progressInit(){
+		printf("\033[H\033[J");
+		//fflush(stdout);
+		printf("\e[?25l");
+}
+void progressEnd(){
+	printf("\e[?25h\n");
+}
+
 void displayProgress(unsigned int currentSize, unsigned int totalSize){
-  static double lastProgress = 0;
+	static int barSize = 40;
   double progress = (((double)currentSize)/totalSize)*100;
-  int barSize = 40;
-  int progresSize = (int)(progress / (100/barSize));
-  /*if((progress - lastProgress) < (100/barSize)){
-    printf("%f\n", ((progress - lastProgress)));
-    return;
-  }*/
-  lastProgress = progress;
-  printf("\033[A\r[");
+  int progresSize = (int)((progress * barSize)/100);
+	//printf("%d\n", ((progresSize - lastProgressSize)));
+
+	printf("\033[A\r[");
   for(int i = 0; i < progresSize; i++){
     printf("%c", '*');
   }
   for(int i = progresSize; i < barSize ; i++){
     printf("%c", '.');
   }
-  printf("]\n");
+  printf("] %2.2f%%", progress);
+	fflush(stdout);
 }
