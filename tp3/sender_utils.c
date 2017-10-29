@@ -62,7 +62,7 @@ void sendPacket(){
   (void) signal(SIGALRM, sendPacket);  // instala rotina que atende interrupcao
   DONE = FALSE;
   if(attempts == 3){
-    printf("TIMEOUT: Failed 3 times, exiting...\n");
+    printf("\nTIMEOUT: Failed 3 times, exiting...\n");
     exit(-1);
   }
   DEBUG_PRINT("Attempt %d/3:\n", (attempts + 1));
