@@ -65,9 +65,9 @@ int destuff(char* str, unsigned int n){
 }
 
 char llopenR(int fd){
-	getCmd(fd, C_SET, FALSE); //TODO: make C_SET a thing
+	getCmd(fd, C_SET, FALSE);
 
-	int retUA=sendSU(fd, C_UA);//TODO: make this accessible
+	int retUA=sendSU(fd, C_UA);
 	if(retUA==-1){
 		return retUA;
 	}
