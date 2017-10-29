@@ -116,7 +116,10 @@ char sendFile(int fd, char * filename){
 	printf("[Sender] Running.\n[S] Sending %s.\n", filename);
 
 	FILE* f=fopen(filename, "r");
-
+	if(!f){//file does not exist
+		printf("File '%s' does not exist\n", filename);
+		exit(-2);
+	}
 	//get file size
 	unsigned int fSize;
 	fseek(f, 0, SEEK_END);
