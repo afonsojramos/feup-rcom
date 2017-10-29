@@ -3,14 +3,12 @@ CFLAGS=-Wall -g -std=c11
 CFLAGSD=$(CFLAGS) -DDEBUG #debug flags
 app: applet_task
 
-applet_task: applet.c utils
+applet_task: applet.c
 	$(CC) applet.c -o applet $(CFLAGS)
 
-applet_taskD: applet.c utils
+applet_taskD: applet.c
 	$(CC) applet.c -o applet $(CFLAGSD)
 
-utils: utils.c
-	$(CC) utils.c -c -o utils -Wall
 
 clean:
 	rm applet
