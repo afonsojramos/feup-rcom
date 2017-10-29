@@ -95,7 +95,7 @@ int llreadR(int fd, char** remote_dest){
 	while (STOP==0) {       /* loop for input */
 		//printf("waiting for input...\n");
 		read(fd, &c, 1);   /* returns after 1 char has been input */
-		//DEBUG_PRINT("read %x state:%d\n", c, state);
+		DEBUG_PRINT("read %x state:%d\n", c, state);
 		switch (state){
 			case 0:
 				if (c==FLAG){
@@ -107,6 +107,8 @@ int llreadR(int fd, char** remote_dest){
 				packet_A=c; // we received the byte A, here. Storing.
 				if(c==A)
 					state = 2;
+				else if(c==FLAG)
+					state = 1;
 				else
 					state = 0;
 			break;
@@ -204,11 +206,15 @@ int llreadR(int fd, char** remote_dest){
 	if(BCC2 !=  (unsigned char) dest[n-1]){
 		//BCC2 check failed!
 		DEBUG_PRINT("\t\tFAILED!\n");
+		//DEBUG_PRINT("Waiting... ");
+		//sleep(2);
 		if(comp(c2Bit(packet_C))==0){
 			sendSU(fd, C_REJ0);
 		}else{
 			sendSU(fd, C_REJ1);
 		}
+		printf("rej sent.\n");
+		return -15;
 	}else{
 		// Getting this frame was an absolute success! Acknowledging!
 		DEBUG_PRINT("sending RR(%d).\n", comp(c2Bit(packet_C)));

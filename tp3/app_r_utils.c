@@ -27,12 +27,16 @@ Additionally, return data on the passed variable, rfile* rf:
 */
 
 char getPacket(int fd, rfile* rf){
+    static unsigned char lastNSeq=255; // value before 0
+    char repeated=0;
     char* packet;
+    int ret;
+    do{
+      ret=llreadR(fd, &packet);
+      DEBUG_PRINT("[R] llreadR just returned. Printing packet:\n");
+      //printB(packet, ret);
+    } while (ret==-15);
 
-    int ret=llreadR(fd, &packet);
-    DEBUG_PRINT("[R] llreadR just returned. Printing packet:\n");
-
-    printB(packet, ret);
     if(ret<0){
       return -1; // Something went wrong with the llread.
     }
@@ -45,9 +49,10 @@ char getPacket(int fd, rfile* rf){
     rf->name=NULL;
     while(!STOP){
       i++; //increment packet byte iterator
+      DEBUG_PRINT("state: %d, i: %d\n", state, i);
       if(i>ret-1){ // if we try to read beyond the end of the packet returned by llread, then something is wrong.
         DEBUG_PRINT("I HIT THE TODO!!\n");
-	      free(packet);
+        free(packet);
         return control;
       }
       unsigned char l;
@@ -113,6 +118,12 @@ char getPacket(int fd, rfile* rf){
         break;
         case 4:
           rf->nSeq=packet[i]; // get N field of packet and store.
+          DEBUG_PRINT("\t\t\t\t\tnSeq:%d. Expecting: %d.\n", (unsigned char) (rf->nSeq), (unsigned char) (lastNSeq+1) );
+          if(lastNSeq!=(unsigned char) (rf->nSeq-1) ){
+            // repeated packet.
+            return -45;
+          }
+          lastNSeq=rf->nSeq;
           unsigned char tempL2=packet[++i];
           rf->cSize=tempL2*256+(unsigned char)packet[++i];
 	        DEBUG_PRINT("alloc'ing %d bytes.\n", rf->cSize);
@@ -121,7 +132,7 @@ char getPacket(int fd, rfile* rf){
             rf->content[j]=packet[++i];
           }
           DEBUG_PRINT("assert bellow!! i: %d, ret: %d\n", i, ret-1);
-          assert(i==ret-1); // should be.
+          //assert(i==ret-1); // should be.
           // TODO test this
         break;
       }
@@ -129,25 +140,4 @@ char getPacket(int fd, rfile* rf){
 
 
     return 0;
-}
-
-
-void displayProgress(unsigned int currentSize, unsigned int totalSize){
-  static double lastProgress = 0;
-  double progress = (((double)currentSize)/totalSize)*100;
-  int barSize = 40;
-  int progresSize = (int)(progress / (100/barSize));
-  /*if((progress - lastProgress) < (100/barSize)){
-    printf("%f\n", ((progress - lastProgress)));
-    return;
-  }*/
-  lastProgress = progress;
-  printf("\033[A\r[");
-  for(int i = 0; i < progresSize; i++){
-    printf("%c", '*');
-  }
-  for(int i = progresSize; i < barSize ; i++){
-    printf("%c", '.');
-  }
-  printf("]\n");
 }
