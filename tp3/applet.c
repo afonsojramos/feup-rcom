@@ -95,10 +95,12 @@ int main(int argc, char **argv){
 		}
 
 		if(result){
+			printf("File transmition was successful!\n");
+			return 0;
+		}else{
 			perror("could not transmit file");
-			return result;
+			return -1;
 		}
-
 }
 
 char sendFile(int fd, char * filename){

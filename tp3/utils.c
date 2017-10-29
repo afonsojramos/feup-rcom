@@ -100,7 +100,7 @@ void getCmd(int fd, unsigned char expecting, char stopAlarm){
 unsigned char getCmdExpectingTwo(int fd, unsigned char expecting1, unsigned char expecting2, char stopAlarm){
 	unsigned char readChar, matchExpected = 0;
 	int state = 0;
-	DEBUG_PRINT("Receiving One of two CMD (0x%x OR 0x%x)...\n", expecting1, expecting2);
+	DEBUG_PRINT("Receiving One of two CMD (0x%X OR 0x%X)...\n", expecting1, expecting2);
 	while (state != 5) {       /* loop for input */
   		read(fd, &readChar, 1);   /* returns after 1 char has been input */
   		DEBUG_PRINT("read 0x%X state:%d\n", readChar, state);
@@ -150,6 +150,6 @@ unsigned char getCmdExpectingTwo(int fd, unsigned char expecting1, unsigned char
 		alarm(0);
 		attempts = 0;//reset the attempt count
     }
-	DEBUG_PRINT("Received Double exepcting CMD properly: 0x%x\n", matchExpected);
+	DEBUG_PRINT("Received Double expecting CMD properly: 0x%X\n", matchExpected);
 	return matchExpected;
 }

@@ -111,7 +111,7 @@ void sendIpacketWithTimeout(unsigned char * sourcePacket, int length){
     DEBUG_PRINT("Initial alarm has been set\n");
     sendPacket();
     DEBUG_PRINT("Packet has been sent\n");
-    DEBUG_PRINT("Receiving either RR or REJ:\n");
+    //Receiving either RR or REJ
     readChar = getCmdExpectingTwo(receiver, getExpecting(), getExpectingRej(), TRUE);//True means stop alarm after receiving
   }while(readChar == getExpectingRej());//while rej is received, resend the
   free(packetToSend);

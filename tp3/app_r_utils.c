@@ -47,7 +47,7 @@ char getPacket(int fd, rfile* rf){
       i++; //increment packet byte iterator
       if(i>ret-1){ // if we try to read beyond the end of the packet returned by llread, then something is wrong.
         DEBUG_PRINT("I HIT THE TODO!!\n");
-		free(packet);
+	      free(packet);
         return control;
       }
       unsigned char l;
@@ -115,7 +115,7 @@ char getPacket(int fd, rfile* rf){
           rf->nSeq=packet[i]; // get N field of packet and store.
           unsigned char tempL2=packet[++i];
           rf->cSize=tempL2*256+(unsigned char)packet[++i];
-		  DEBUG_PRINT("alloc'ing %d bytes.\n", rf->cSize);
+	        DEBUG_PRINT("alloc'ing %d bytes.\n", rf->cSize);
           rf->content=malloc(sizeof(char)*rf->cSize);
           for(int j=0;j<rf->cSize;j++){
             rf->content[j]=packet[++i];
@@ -129,4 +129,10 @@ char getPacket(int fd, rfile* rf){
 
 
     return 0;
+}
+
+
+void displayProgress(unsigned long long currentSize, unsigned long long totalSize){
+  printf("Progress: %lld/%lld", currentSize, totalSize);
+  fflush(stdout);
 }
