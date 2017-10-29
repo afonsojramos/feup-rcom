@@ -24,6 +24,9 @@ typedef struct{
 char sendFile(int fd, char * filename);
 char readFile(int fd);
 
+void displayProgress(unsigned int currentSize, unsigned int totalSize);
+
+
 int main(int argc, char **argv){
 	struct termios oldtio,newtio;
   config cfg = { .fd_port = 0, .fd_file_send = 0, .fd_file_create = 0};
@@ -185,6 +188,9 @@ char readFile(int fd){
 		gpRet=getPacket(fd, &received);
 		if(gpRet==3)
 			break;
+		else if(gpRet==-45){ // packet out of order.
+			continue;
+		}
 		DEBUG_PRINT("writting %d bytes to file.\n", received.cSize);
 		printB(received.content, received.cSize);
 		fwrite(received.content, 1, received.cSize, f);
@@ -204,4 +210,24 @@ char readFile(int fd){
 
 
 	return TRUE;
+}
+
+void displayProgress(unsigned int currentSize, unsigned int totalSize){
+  static double lastProgress = 0;
+  double progress = (((double)currentSize)/totalSize)*100;
+  int barSize = 40;
+  int progresSize = (int)(progress / (100/barSize));
+  /*if((progress - lastProgress) < (100/barSize)){
+    printf("%f\n", ((progress - lastProgress)));
+    return;
+  }*/
+  lastProgress = progress;
+  printf("\033[A\r[");
+  for(int i = 0; i < progresSize; i++){
+    printf("%c", '*');
+  }
+  for(int i = progresSize; i < barSize ; i++){
+    printf("%c", '.');
+  }
+  printf("]\n");
 }
