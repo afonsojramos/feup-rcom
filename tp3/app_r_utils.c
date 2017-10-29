@@ -132,7 +132,22 @@ char getPacket(int fd, rfile* rf){
 }
 
 
-void displayProgress(unsigned long long currentSize, unsigned long long totalSize){
-  printf("Progress: %lld/%lld", currentSize, totalSize);
-  fflush(stdout);
+void displayProgress(unsigned int currentSize, unsigned int totalSize){
+  static double lastProgress = 0;
+  double progress = (((double)currentSize)/totalSize)*100;
+  int barSize = 40;
+  int progresSize = (int)(progress / (100/barSize));
+  /*if((progress - lastProgress) < (100/barSize)){
+    printf("%f\n", ((progress - lastProgress)));
+    return;
+  }*/
+  lastProgress = progress;
+  printf("\033[A\r[");
+  for(int i = 0; i < progresSize; i++){
+    printf("%c", '*');
+  }
+  for(int i = progresSize; i < barSize ; i++){
+    printf("%c", '.');
+  }
+  printf("]\n");
 }

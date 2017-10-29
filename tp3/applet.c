@@ -28,6 +28,12 @@ int main(int argc, char **argv){
 	struct termios oldtio,newtio;
   config cfg = { .fd_port = 0, .fd_file_send = 0, .fd_file_create = 0};
 
+	/*fflush(stdout);
+	int total = 200000;
+	for(int i = 0; i < total; i++){
+		displayProgress(i, total);
+	}*/
+
 	printf("Sender(1) or Receiver(0)?\n");
 	int stat;
 	scanf("%d", &stat);
@@ -123,12 +129,12 @@ char sendFile(int fd, char * filename){
 	// we will be using 512bytes packets.
 	int STOP=0;
 	while(!STOP){
-		char bytes[512];
-		unsigned int bytesRead=fread(bytes, 1, 128, f);
+		char bytes[FRAME_SIZE];
+		unsigned int bytesRead=fread(bytes, 1, FRAME_SIZE, f);
 		DEBUG_PRINT("[S] Sending %d bytes.\n", bytesRead);
 		sendData(fd, bytes, bytesRead);
 		//exit(-1);
-		if(bytesRead<128){
+		if(bytesRead<FRAME_SIZE){
 			// we got to the eof.
 			STOP=1;
 		}

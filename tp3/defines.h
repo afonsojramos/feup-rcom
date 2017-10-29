@@ -24,3 +24,5 @@
 #define C_DISC 	0x0b	//0b00001011
 
 #define BAUDRATE B38400
+
+#define FRAME_SIZE 256
