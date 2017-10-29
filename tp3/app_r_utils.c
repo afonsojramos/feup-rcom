@@ -28,7 +28,6 @@ Additionally, return data on the passed variable, rfile* rf:
 
 char getPacket(int fd, rfile* rf){
     static unsigned char lastNSeq=255; // value before 0
-    char repeated=0;
     char* packet;
     int ret;
     do{
