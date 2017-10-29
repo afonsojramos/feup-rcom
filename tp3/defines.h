@@ -25,4 +25,4 @@
 
 #define BAUDRATE B38400
 
-#define FRAME_SIZE 8
+#define FRAME_SIZE 128
