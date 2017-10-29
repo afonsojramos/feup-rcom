@@ -34,4 +34,4 @@ runS: sender_task
 
 runP: applet_task
 	clear
-	./applet pinguim.gif
+	./applet maracas.gif #guiao.pdf
