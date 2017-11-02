@@ -4,7 +4,49 @@
 #include <assert.h>
 #include "utils.c"
 
+#include <sys/time.h>  // Time-tests
+
+
 #define c2Bit(x)	(x&0b01000000)>>6
+
+struct tProp{
+	unsigned long acc;
+	unsigned long start;
+	unsigned int count;
+};
+
+struct tProp TT_tprop = { .acc = 0, .start = 0, .count = 0 };
+
+
+void TT_iReceived(){
+	struct timeval timecheck;
+
+    gettimeofday(&timecheck, NULL);
+    TT_tprop.start = (unsigned long)timecheck.tv_sec * 1000000 + (unsigned long)timecheck.tv_usec;
+	
+}
+
+
+void TT_rrSent(){
+	struct timeval timecheck;
+	
+	unsigned long currentTime;
+
+    gettimeofday(&timecheck, NULL);
+    currentTime = (unsigned long)timecheck.tv_sec * 1000000 + (unsigned long)timecheck.tv_usec;
+	
+	TT_tprop.acc+=currentTime-TT_tprop.start;
+	TT_tprop.count++;
+
+}
+
+
+void TT_printStats(){
+	printf("======== Transmission Statictics ========\n");
+	printf("| total time waiting: %05lu		  |",		 	 TT_tprop.acc );
+	printf("| Packets received: %05u			  |", 		 TT_tprop.count );
+	printf("| Average Tprop: %05lu			  |", 			(TT_tprop.acc/2)/TT_tprop.count );
+}
 
 char comp(char x){
 	if(x==1){
@@ -17,6 +59,7 @@ char comp(char x){
 
 int sendSU(int fd, char control){
 
+
 	unsigned char cmd[5];
 
 	cmd[0] = FLAG;				// ┎ start flag
@@ -26,6 +69,10 @@ int sendSU(int fd, char control){
 	cmd[4] = FLAG;				// ┖ end flag
 
 	printB((char*) cmd, 5);
+	
+	if(control == C_RR0 || control == C_RR1){
+		TT_rrSent();
+	}
 	return write(fd, cmd, 5);
 }
 
@@ -129,7 +176,7 @@ int llreadR(int fd, char** remote_dest){
 
 				if(BCC_OK){
 					state=4;
-
+					TT_iReceived();
 				}else
 					state=0;
 			break;
@@ -166,6 +213,7 @@ int llreadR(int fd, char** remote_dest){
 						// end of datagram!! We got a DISC though.
 						STOP=1;
 						sendSU(fd, C_DISC);
+						TT_printStats();
 						getCmd(fd, C_UA, FALSE);
 						free(dest);
 						return -6; // signal DISC
