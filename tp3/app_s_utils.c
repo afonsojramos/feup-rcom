@@ -1,4 +1,3 @@
-#pragma once
 #include "defines.h"
 #include "sender_utils.c"
 

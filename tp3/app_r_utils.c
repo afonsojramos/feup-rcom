@@ -1,4 +1,3 @@
-#pragma once
 #include "defines.h"
 #include "receiver_utils.c"
 
