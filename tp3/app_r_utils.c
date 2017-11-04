@@ -31,8 +31,8 @@ char getPacket(int fd, rfile* rf){
     char* packet;
     int ret;
     do{
-      ret=llreadR(fd, &packet);
-      DEBUG_PRINT("[R] llreadR just returned. Printing packet:\n");
+      ret=llread(fd, &packet);
+      DEBUG_PRINT("[R] llread just returned. Printing packet:\n");
       //printB(packet, ret);
     } while (ret==-15);
 

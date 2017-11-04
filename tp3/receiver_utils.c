@@ -75,7 +75,7 @@ char llopenR(int fd){
 }
 
 
-int llreadR(int fd, char** remote_dest){
+int llread(int fd, char** remote_dest){
 	char* dest=*remote_dest;
 
 	DEBUG_PRINT("Entered llread.\n");

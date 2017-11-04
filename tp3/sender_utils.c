@@ -169,7 +169,7 @@ int prepareI(char * data, int size, char C){
 * @param receiver a file descriptor for the receiver, already open
 * @return -1 if fails or 1 if it is successful
 */
-int llwriteS(int receiver, char * data, int size){
+int llwrite(int receiver, char * data, int size){
   DONE = FALSE;
   int sizeToWrite = prepareI(data, size, CurrentC);//loads the data into global I
   sendIpacketWithTimeout(I, sizeToWrite);

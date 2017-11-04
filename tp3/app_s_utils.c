@@ -36,7 +36,7 @@ int sendControl(int fd, unsigned char start, char *fileName, unsigned int fileSi
 	printB(bytes, currPos);
     // HOORAY -- our packet is complete! Sending...
 
-    return llwriteS(fd, bytes, currPos);
+    return llwrite(fd, bytes, currPos);
 }
 
 char sendData(int fd, char* bytes, unsigned int size){
@@ -52,5 +52,5 @@ char sendData(int fd, char* bytes, unsigned int size){
     packet[3] = (unsigned char) size;
     memcpy((packet+4), bytes, size);
 
-	return llwriteS(fd, packet, size + 4);
+	return llwrite(fd, packet, size + 4);
 }
