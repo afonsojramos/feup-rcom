@@ -1,5 +1,5 @@
 CC=g++
-CFLAGS=-Wall -g
+CFLAGS=-Wall -g -std=c++11
 CFLAGSD=$(CFLAGS) -DDEBUG #debug flags
 app: download_task
 
@@ -13,11 +13,11 @@ download_taskD: download.cpp
 clean:
 	rm download
 #make instructions
-defaultUrl=pinguim.gif
+defaultUrl=ftp://user:password@fe.up.pt/base/lol/file.json
 run: download_task #run the file
 	clear
 	./download $(defaultUrl)
 
-runD: download_task #run the file in Debug mode
+runD: download_taskD #run the file in Debug mode
 	clear
 	./download $(defaultUrl)
