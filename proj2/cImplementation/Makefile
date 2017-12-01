@@ -11,7 +11,7 @@ urlParser: urlParser.h urlParser.c
 
 
 clean:
-	rm download
+	rm download urlParser.o
 
 #make instructions
 defaultUrl=ftp://user:password@fe.up.pt/base/lol/file.json
