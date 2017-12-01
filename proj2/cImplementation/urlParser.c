@@ -123,6 +123,7 @@ parsedURL_t loadUrl(char *url)
 	{
 		strcpy(ret.host, hap.host);
 		strcpy(ret.path, hap.path);
+		strcpy(ret.filename, hap.filename);
 	}
 	
 	ret.success=1;

@@ -20,6 +20,7 @@ int main(int argc, char **argv)
 		printf("password:	%s\n", URL.password);
 		printf("host:		%s\n", URL.host);
 		printf("path:		%s\n", URL.path);
+		printf("filename:	%s\n", URL.filename);
 	}
 
 	return 0;
