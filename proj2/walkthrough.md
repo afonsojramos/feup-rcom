@@ -43,11 +43,14 @@
   * Mudar para tuxY4 (para lhe dizer para fazer forward correto dos pacotes que não so para ele em vez de os descartar)
    * `echo 1> /proc/sys/net/ipv4/ip_forward`
    * `echo 0> /proc/sys/net/ipv4/icmp_echo_ignore_broadcasts`
-  *  
-  
- Entregar relatório até dia 22/12
-  
-   
-   
-   * [TODO]copy running-config flash:<turma-nome1-nome2-nome3>
+   * `route -n` ver rotas, não deve ser preciso mexer
+  * Mudar para o tuxY2
+   * `route add -net 172.16.30.0 gw 172.16.31.253 netmask 255.255.255.0`
+   * ping do 2 para 1 já deve funcionar [passo era opcional]
+  * [SOMETHING MISSING - unavble to ping outside world from any vlan]
+ 
+ 5. Apresentar FTP client na rede configurada :muscle:
+ 
+ **NOTA:** Entregar relatório até dia 22/12
+ **[TODO]:** copy running-config flash:<turma-nome1-nome2-nome3>
 
