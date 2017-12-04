@@ -38,7 +38,7 @@ int sendGenericCommand(int sockfd, char *cmd)
 	int bytes;
 	char buf[2048];
 	strcpy(buf, cmd);
-	strcat(buf, "\n");
+	strcat(buf, "\r\n");
 
 	bytes = write(sockfd, buf, strlen(buf));
 	bytes = read(sockfd, buf, 2048);
@@ -117,7 +117,7 @@ char getFileFromFTPServer(parsedURL_t URL)
 	bzero(buf, 2048);
 	strcpy(buf, "USER ");
 	strcat(buf, URL.username);
-	strcat(buf, "\n");
+	strcat(buf, "\r\n");
 	bytes = write(sockfd, buf, strlen(buf));
 	printf("wrote %d bytes.\n", bytes);
 	bytes = read(sockfd, buf, 2048);
@@ -133,7 +133,7 @@ char getFileFromFTPServer(parsedURL_t URL)
 	bzero(buf, 2048);
 	strcpy(buf, "PASS ");
 	strcat(buf, URL.password);
-	strcat(buf, "\n");
+	strcat(buf, "\r\n");
 
 	bytes = write(sockfd, "PASS sdfw\n", 10);
 	bzero(buf, 2048);
