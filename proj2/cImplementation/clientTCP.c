@@ -193,7 +193,7 @@ char getFileFromFTPServer(parsedURL_t URL)
 		printf("'PASV' command got reply %sExiting...\n", buf);
 		exit(3);
 	}
-	unsigned int passPort = getPASVport(buf);
+	unsigned short passPort = getPASVport(buf);
 
 	printf("Passive mode port is %d.\n", passPort);
 
@@ -209,13 +209,54 @@ char getFileFromFTPServer(parsedURL_t URL)
 		perror("socket()");
 		exit(0);
 	}
-	write(sockfd, "MLSD\r\n", 6);
-	read(psockfd, buf, 2048);
+	/*connect to the server*/
+	if (connect(psockfd,
+				(struct sockaddr *)&server_addr,
+				sizeof(server_addr)) < 0)
+	{
+		perror("connect()");
+		exit(0);
+	}
+
+		// we should now change directory, if necessary
+	if(strlen(URL.path) !=0){
+		char cmd[1512];
+		sprintf(cmd, "CWD %s", URL.path);
+		sendGenericCommand(sockfd, cmd);
+	}else{
+		sendGenericCommand(sockfd, "CWD /");
+	}
+	sendGenericCommand(sockfd, "TYPE I");
+
+	sprintf(buf, "RETR %s\r\n", URL.filename);
+	write(sockfd, buf, strlen(buf));
 	puts(buf);
+	read(sockfd, buf, 2048);
 
+	size_t filesize;
+	sscanf(buf,"%*[^(](%ld bytes", &filesize);
 
-	//printf("code: %d\n", code);
+	// we can start reading the file.
 
+	size_t rsf=0; // read so far
+	FILE* f;
+	f=fopen(URL.filename, "w"); // get FILE*
+	while(1){
+		bytes=read(psockfd, buf, 2048);
+		if(bytes<=0)
+			break;
+		rsf+=bytes;
+		fwrite(buf, bytes, 1, f);
+	}
+
+	printf("ftell: %d. fsize: %d\n", ftell(f), filesize);
+	if(ftell(f)!=filesize){
+		printf("File size does not match!\n");
+	}
+	fclose(f);
+	close(psockfd);
+	getReply(sockfd);
 	close(sockfd);
+	free(buf);
 	exit(0);
 }
