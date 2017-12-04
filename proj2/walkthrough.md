@@ -15,7 +15,7 @@
    * [só se necessário: `configure terminal`] + `interface fastethernet 0/1` + `switchport mode access` + `switchport access vlanY0`(0 é o bloco do switch (só temos 1), 1 é a porta a qual o cabo do tuxY1 deve ligar no switch) 
    * repetir o comando acima para (vlanY0  + 0/2; vlanY1 + 0/13; vlanY1 + 14; vlanY1 + 15) (13, 14, 15 são portas fisicamente relevantes, podiam ser quaisquer outras) + `end`
    
- 3. Configurar IPs nos tuxs
+ 3. Configurar IPs (tuxs + router)
   * Mudar para o tuxYX (X em [1, 4, 2]) e fazer o comando seguinte com o IP correto
   * `ifconfig eth0 172.16.Y0.1/24` (/24 'e a subnet - quantos bits do IP estão fora da subnet interna (24 = 3 * 8, ie, 172.16.Y0.QQ pertence à mesma rede))
     * tuxY0 - `ifconfig eth0 172.16.Y0.1/24`
@@ -23,11 +23,26 @@
     * tuxY4 - `ifconfig eth1 172.16.Y1.253/24`
     * tuxY2 - `ifconfig eth0 172.16.Y1.1/24`
   * Ligar o router
+  * Trocar o cabo que vinha do tuxY1 (ligado ao switch) e ligar ao router (porta ao lado)
+  * Abrir gtkterm
+  * username `root` + password `8nortel`
+  * [opcional] `show running-config` para visualizar configuração atual
+  * `conf t` + `interface gigabitethernet 0/0` (0 é o bloco/0 é a gigaethernet port no switch) + `ip address 172.16.Y1.254 255.255.255.0` (o 255.255.255.0 é outra forma de especificar a netmask) + `no shutdown` + `ip nat inside` + `exit` (sem fazer `end` para o próximo)
+  * `interface gigabitethernet 0/1` (0 é o bloco/1 é a gigaethernet port no switch) + `ip address 172.16.1.Y9 255.255.255.0` + `no shutdown` + `ip nat outside` + `exit` (é `outside` e não `inside` para ligar ao exterior)
+  * `ip nat pool ovrld 172.16.1.Y9 172.16.1.Y9 prefix 24`
+  * `ip nat inside source list 1 pool ovrld overload`
+  * `access-list 1 permit 172.16.Y0.0 0.0.0.7` - para a vlanY0
+  * `access-list 1 permit 172.16.Y1.0 0.0.0.7` - para a vlanY1
+  * `ip route 0.0.0.0 0.0.0.0 172.16.1.254`
+  * `ip route 172.16.Y0.0 255.255.255.0 172.16.Y1.253` - Se o router precisar de mandar para a rede Y30, que tem a máscara `255.255.255.0`, mandar antes para `172.16.Y1.253` e este sabe o que fazer
+  * `end`
+  
+ 4. Configurar Rotas
+  * 
+  
+ Entregar relatório até dia 22/12
   
    
    
    * [TODO]copy running-config flash:<turma-nome1-nome2-nome3>
- 
-Vlan 30 - tux31 (172.16.30.1/24 | eth0) + tux34(172.16.30.254/24 | eth0)
-Vlan 31 - tux31 (172.16.30.1/24 | eth0) + tux34(172.16.30.254/24 | eth0)
 
