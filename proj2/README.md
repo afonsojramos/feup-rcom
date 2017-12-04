@@ -56,5 +56,4 @@
  6. Apresentar FTP client na rede configurada :muscle:
  
  **NOTA:** Entregar relatório até dia 22/12
- **[TODO]:** copy running-config flash:<turma-nome1-nome2-nome3>
 
