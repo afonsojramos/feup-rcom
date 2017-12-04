@@ -38,7 +38,12 @@
   * `end`
   
  4. Configurar Rotas
-  * 
+  * Apagar as rotas (`route del -net <> gw <> netmask <>`)(<> = destination, gateway, netmask)[não deve ser preciso]
+  * `route add -net 172.16.Y1.0 gw 172.16.Y0.254 netmask 255.255.255.0` - dizer ao tuxY1 como aceder ao tuxY2 (pelo tuxY4) e ao router (ping de tuxY1 para tuxY2 deve funcionar)
+  * Mudar para tuxY4 (para lhe dizer para fazer forward correto dos pacotes que não so para ele em vez de os descartar)
+   * `echo 1> /proc/sys/net/ipv4/ip_forward`
+   * `echo 0> /proc/sys/net/ipv4/icmp_echo_ignore_broadcasts`
+  *  
   
  Entregar relatório até dia 22/12
   
