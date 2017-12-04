@@ -7,7 +7,7 @@ parsedURL_t getHostAndPath(char *partOfUrl){
 	memset(ret.host, 	 0, 256);
 	memset(ret.path, 	 0, 1024);
 	memset(ret.filename, 0, 512);
-	
+
 	ret.success = 0;
 	char *path;
 	if (partOfUrl[0] == '/')
@@ -125,7 +125,10 @@ parsedURL_t loadUrl(char *url)
 		strcpy(ret.path, hap.path);
 		strcpy(ret.filename, hap.filename);
 	}
-	
+	if(strlen(ret.username)==0){
+		strcpy(ret.username, "anonymous");
+		strcpy(ret.password, "randompwd");
+	}
 	ret.success=1;
 	return ret;
 }
