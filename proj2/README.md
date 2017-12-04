@@ -49,7 +49,11 @@
    * ping do 2 para 1 já deve funcionar [passo era opcional]
   * [SOMETHING MISSING - unavble to ping outside world from any vlan]
  
- 5. Apresentar FTP client na rede configurada :muscle:
+ 5. Guardar configuração do switch
+ * Ligar o tuxY1 ao switch
+ * `copy running-config flash:<turma-nome1-nome2-nome3>` - a cópia fica feita (para nós: **danafig**)
+ 
+ 6. Apresentar FTP client na rede configurada :muscle:
  
  **NOTA:** Entregar relatório até dia 22/12
  **[TODO]:** copy running-config flash:<turma-nome1-nome2-nome3>
