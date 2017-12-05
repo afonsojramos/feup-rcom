@@ -17,7 +17,6 @@ int getCodeFromReply(char *str)
 {
 	int code;
 	code = atoi(str);
-	printf("got code %d\n", code);
 	if (code == 421){
 		// special termination code.
 		exit(-9);
@@ -27,10 +26,12 @@ int getCodeFromReply(char *str)
 
 size_t getPASVport(char* cmd){
 	int p1, p2;
-	char* index = strstr(cmd, "(");
-	int lixo;
+	char* index = strchr(cmd, '(');
+	if(index==NULL){
+		exit(-8);
+	}
 
-	sscanf(index, "(%d, %d, %d, %d, %d, %d)", &lixo, &lixo, &lixo, &lixo, &p1, &p2);
+	sscanf(index, "(%*d, %*d, %*d, %*d, %d, %d)", &p1, &p2);
 	return p1*256+p2;
 }
 
@@ -73,6 +74,34 @@ int getReply(int sockfd){
 	}
 	return code;
 }
+
+
+void progressInit(){
+		printf("\033[H\033[J");
+		//fflush(stdout);
+		printf("\e[?25l");
+}
+void progressEnd(){
+	printf("\e[?25h\n");
+}
+
+void displayProgress(unsigned int currentSize, unsigned int totalSize){
+	static int barSize = 40;
+  double progress = (((double)currentSize)/totalSize)*100;
+  int progresSize = (int)((progress * barSize)/100);
+	//printf("%d\n", ((progresSize - lastProgressSize)));
+
+	printf("\033[A\r[");
+  for(int i = 0; i < progresSize; i++){
+    printf("%c", '*');
+  }
+  for(int i = progresSize; i < barSize ; i++){
+    printf("%c", '.');
+  }
+  printf("] %2.2f%%", progress);
+	fflush(stdout);
+}
+
 
 /**
  * Used to send a command that expects a 200 response.
@@ -120,8 +149,12 @@ char getFileFromFTPServer(parsedURL_t URL)
 
 	char ip[64];
 	getnameinfo(infoptr->ai_addr, infoptr->ai_addrlen, ip, sizeof(ip), NULL, 0, NI_NUMERICHOST);
-	printf("Got IP: %s\n", ip);
 
+	freeaddrinfo(infoptr);
+
+	printf("IP: %s\n", ip);
+	printf("Press ENTER to continue...\n");
+	getc(stdin);
 	/*server address handling*/
 	bzero((char *)&server_addr, sizeof(server_addr));
 	server_addr.sin_family = AF_INET;
@@ -187,7 +220,8 @@ char getFileFromFTPServer(parsedURL_t URL)
 	// enter passive mode
 	sprintf(buf, "PASV\r\n");
 	bytes=write(sockfd, buf , strlen(buf));
-	read(sockfd, buf, 2048);
+	bytes=read(sockfd, buf, 2048);
+	buf[bytes]=0;
 	if (getCodeFromReply(buf) != 227)
 	{
 		printf("'PASV' command got reply %sExiting...\n", buf);
@@ -228,11 +262,10 @@ char getFileFromFTPServer(parsedURL_t URL)
 	}
 	sendGenericCommand(sockfd, "TYPE I");
 
+	bzero(buf, 2048);
 	sprintf(buf, "RETR %s\r\n", URL.filename);
-	write(sockfd, buf, strlen(buf));
-	puts(buf);
+	bytes=write(sockfd, buf, strlen(buf));
 	read(sockfd, buf, 2048);
-
 	size_t filesize;
 	sscanf(buf,"%*[^(](%ld bytes", &filesize);
 
@@ -240,6 +273,7 @@ char getFileFromFTPServer(parsedURL_t URL)
 
 	size_t rsf=0; // read so far
 	FILE* f;
+	progressInit();
 	f=fopen(URL.filename, "w"); // get FILE*
 	while(1){
 		bytes=read(psockfd, buf, 2048);
@@ -247,12 +281,15 @@ char getFileFromFTPServer(parsedURL_t URL)
 			break;
 		rsf+=bytes;
 		fwrite(buf, bytes, 1, f);
+		displayProgress(rsf, filesize);
 	}
-
-	printf("ftell: %d. fsize: %d\n", ftell(f), filesize);
-	if(ftell(f)!=filesize){
+	progressEnd();puts("\n");
+	//printf("\nftell: %lu. fsize: %lu\n", ftell(f), filesize);
+	if((unsigned long)ftell(f)!=filesize){
 		printf("File size does not match!\n");
+		exit(-6);
 	}
+	printf("File downloaded successfully!\n");
 	fclose(f);
 	close(psockfd);
 	getReply(sockfd);
