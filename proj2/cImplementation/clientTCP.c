@@ -13,6 +13,76 @@
 
 #include <errno.h>
 
+
+size_t min(size_t a, size_t b){
+	if(a<b)
+		return a;
+	return b;
+}
+
+/**
+	* We use this function because different servers reply in different ways.
+	* param buf pointer to the string to parse.
+	* param fsize pointer to where the size should be written (in bytes)
+	* return 1 if fsize is exact, 0 otherwise, and -1 if fails (fsize becomes 0)
+  */
+char getFizeSizeFrom150(char* buf, size_t* fsize){
+	/**
+		* replies may come in many formats:
+		* - 159845 bytes
+		*	- 5463 kbytes
+		*/
+		char precision=0;
+		/* first fing to do is determine the integer (or float)
+		associated with the file size. */
+		char* sizeStr;
+		printf("str is %s\n", buf);
+
+		sizeStr = strstr(buf, "bytes");
+		// find bytes in string.
+		if(sizeStr==NULL){// aka didn't find
+			*fsize=0;
+			return -1;
+		}
+		sizeStr-=2; // sizeStr should start at least 2 chars before "bytes".
+		while(1){
+			// go back while we have numbers (not YOLO cause we'll do some checking).
+			if( (('0' <=*(sizeStr-1) && *(sizeStr-1)<='9' )||*(sizeStr-1)=='.') && sizeStr-1>buf){
+				sizeStr--;
+			}else{
+				break;
+			}
+		}
+
+		printf("guessing size is near %s\n", sizeStr);
+
+		//ok, we still need to check if we're talking bytes, kbytes, or something else.
+
+		char* multipier = strchr(sizeStr, ' ');
+
+		unsigned long mult=0;
+		printf("switching on %c\n", *(multipier+1));
+		switch (*(multipier+1)) {
+			case 'b': // b is the first char of Bytes.
+				mult=1;
+				precision=1;
+			break;
+			case 'k': // k stands for kilo.
+				mult=1000;
+			break;
+			default:
+				// ups, unrecognized multiplier.
+				*fsize=0;
+				return -1;
+			break;
+		}
+
+		*fsize=(unsigned int)(mult*atof(sizeStr)); // store fsize
+
+		return precision;
+}
+
+
 int getCodeFromReply(char *str)
 {
 	int code;
@@ -49,21 +119,38 @@ long findCmdSpaceInStr(char* str, int code){
 /**
 	* We use this function (instead of reading direclty) because there is the
 	* possibility that we'll get a multi-line response.
-
+	* param sockfd the file descriptor of the socket from which we'll read.
+	* param strRet if NULL, no string is passed, else memory is alloc'ed and string is written there
 	* return reply code
   */
-int getReply(int sockfd){
-	char buf[2048];
+int getReply(int sockfd, char** strRet){
+	if(strRet!=NULL){
+		(*strRet)=malloc(2048*sizeof(char));
+		bzero(*strRet, 2048);
+	}
 	int code;
-
-	read(sockfd, buf, 2048);
+	int bytes;
+	char buf[2048];
+	bzero(buf, 2048);
+	bytes = read(sockfd, buf, 2048);
+	//printf("read %d bytes: %s\n", bytes, buf);
 	if(buf[3]=='-'){
 		// multi-line reply here.
 		code = getCodeFromReply(buf);
-		if(findCmdSpaceInStr(buf, code)>0)
+		int wsf=bytes; // written so far
+		if(findCmdSpaceInStr(buf, code)>0){
+			if(strRet!=NULL){
+				strncat(*strRet, buf, 2048-wsf);
+				wsf+=bytes;
+			}
 			return code;
+		}
 		while(1){
-			read(sockfd, buf, 2048);
+			bytes = read(sockfd, buf, 2048);
+			if(strRet!=NULL){
+				strncat(*strRet, buf, 2048-wsf);
+				wsf+=bytes;
+			}
 			if(findCmdSpaceInStr(buf, code)>0)
 				return code;
 		}
@@ -71,6 +158,8 @@ int getReply(int sockfd){
 	else{
 		//single line reply.
 		code = getCodeFromReply(buf);
+		if(strRet!=NULL)
+			strncpy(*strRet, buf, 2048); // write reply to strRet if it is not NULL
 	}
 	return code;
 }
@@ -194,12 +283,11 @@ char getFileFromFTPServer(parsedURL_t URL)
 		}
 	}
 	//ready to send user name
-
 	sprintf(buf, "USER %s\r\n", URL.username);
 	bytes = write(sockfd, buf, strlen(buf));
 
 
-	if (getReply(sockfd) != 331)
+	if (getReply(sockfd, NULL) != 331)
 	{
 		printf("'USER username' command got reply %sExiting...\n", buf);
 		exit(3);
@@ -208,7 +296,7 @@ char getFileFromFTPServer(parsedURL_t URL)
 	// send password
 	sprintf(buf, "PASS %s\r\n", URL.password);
 	bytes = write(sockfd, buf, strlen(buf));
-	if (getReply(sockfd) != 230)
+	if (getReply(sockfd, NULL) != 230)
 	{
 		printf("'PASS password' command got reply %sExiting...\n", buf);
 		exit(3);
@@ -220,14 +308,18 @@ char getFileFromFTPServer(parsedURL_t URL)
 	// enter passive mode
 	sprintf(buf, "PASV\r\n");
 	bytes=write(sockfd, buf , strlen(buf));
-	bytes=read(sockfd, buf, 2048);
+	char* retStr;
+
 	buf[bytes]=0;
-	if (getCodeFromReply(buf) != 227)
+	if (getReply(sockfd, &retStr) != 227)
 	{
 		printf("'PASV' command got reply %sExiting...\n", buf);
 		exit(3);
 	}
-	unsigned short passPort = getPASVport(buf);
+	printf("getReply wrote to retStr: %s\n", retStr);
+
+	unsigned short passPort = getPASVport(retStr);
+	free(retStr);
 
 	printf("Passive mode port is %d.\n", passPort);
 
@@ -265,12 +357,11 @@ char getFileFromFTPServer(parsedURL_t URL)
 	bzero(buf, 2048);
 	sprintf(buf, "RETR %s\r\n", URL.filename);
 	bytes=write(sockfd, buf, strlen(buf));
-	read(sockfd, buf, 2048);
+	getReply(sockfd, &retStr);
 	size_t filesize;
-	sscanf(buf,"%*[^(](%ld bytes", &filesize);
-
-	// we can start reading the file.
-
+	char precise;
+	precise = getFizeSizeFrom150(retStr, &filesize);
+	free(retStr);
 	size_t rsf=0; // read so far
 	FILE* f;
 	progressInit();
@@ -281,18 +372,24 @@ char getFileFromFTPServer(parsedURL_t URL)
 			break;
 		rsf+=bytes;
 		fwrite(buf, bytes, 1, f);
-		displayProgress(rsf, filesize);
+		if(precise !=-1) // -1 means failure, and fsize came out 0. No progress bar then.
+			displayProgress(min(rsf, filesize), filesize);
+		//printf("progress: %ld/%ld\n", rsf, filesize);
 	}
-	progressEnd();puts("\n");
+	progressEnd();
 	//printf("\nftell: %lu. fsize: %lu\n", ftell(f), filesize);
-	if((unsigned long)ftell(f)!=filesize){
-		printf("File size does not match!\n");
-		exit(-6);
+	if(precise){
+		//then we can do this checking.
+		if((unsigned long)ftell(f)!=filesize){
+			printf("File size does not match!\n");
+			exit(-6);
+		}
 	}
+
 	printf("File downloaded successfully!\n");
 	fclose(f);
 	close(psockfd);
-	getReply(sockfd);
+	getReply(sockfd, NULL);
 	close(sockfd);
 	free(buf);
 	exit(0);
