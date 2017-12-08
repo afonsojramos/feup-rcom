@@ -19,7 +19,8 @@
    * [só se necessário: `configure terminal`] + `interface fastethernet 0/1` + `switchport mode access` + `switchport access vlanY0`(0 é o bloco do switch (só temos 1), 1 é a porta a qual o cabo do tuxY1 deve ligar no switch) 
    * repetir o comando acima para (vlanY0  + 0/2; vlanY1 + 0/13; vlanY1 + 14; vlanY1 + 15) (13, 14, 15 são portas fisicamente relevantes, podiam ser quaisquer outras) + `end`
    
-  ###### Os passos 3. e 4. podem ser substituidos pela execução dos ficheiros configTuxYX.sh respetivos, e carregamento do ficheiro de configuração do router.
+  ###### Os pontos dos passos 3. e 4. referentes à execução de comandos em linux podem ser substituidos pela execução dos ficheiros configTuxYX.sh respetivos.
+  
  3. Configurar IPs (tuxs + router)
   * Mudar para o tuxYX (X em [1, 4, 2]) e fazer o comando seguinte com o IP correto
   * `service networking restart` (para repor as definiçes padrão)
