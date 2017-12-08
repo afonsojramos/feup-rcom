@@ -13,14 +13,17 @@ echo "Default gateway route set."
 route add -net 172.16.31.0/24 gw 172.16.30.254
 echo "Route to VLAN 31 set."
 
-echo "172.16.1.1" > /etc/resolv.conf
+printf "search netlab.fe.up.pt\nnameserver 172.16.1.1\nnameserver 172.16.2.1\n" > /etc/resolv.conf
 echo "DNS set."
 
-ping -q -c5 google.com > /dev/null
- 
-if [ $? -eq 0 ]
-then
-	echo -e "\033[0;32mSUCCESS\033[0m: Could ping a foreign host, by hostname. Network and DNS are OK."
+echo "Performing ping test..."
+ping -q -c 1 google.pt  > /dev/null
+
+
+zero=0
+
+if [ "$?" -ne "$zero" ]; then
+	echo -n -e "\033[0;31mERROR\033[0m: Could NOT ping a foreign host. Please review! Error "
 else
-  echo -e "\033[0;31mERROR\033[0m: Could NOT ping a foreign host. Please review!" 
+	echo -e "\033[0;32mSUCCESS\033[0m: Could ping a foreign host, by hostname. Network and DNS are OK."
 fi
