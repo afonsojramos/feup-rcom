@@ -2,5 +2,5 @@ proj1/tp3/receiver
 proj1/tp3/sender
 proj1/tp3/applet
 proj2/download
-proj2/cImplementation/download
+proj2/ftp_client/download
 *.o
