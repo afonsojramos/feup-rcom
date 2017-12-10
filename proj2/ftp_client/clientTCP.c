@@ -106,10 +106,9 @@ size_t getPASVport(char* cmd){
 }
 
 long findCmdSpaceInStr(char* str, int code){
-	size_t len;
+	size_t len, i;
 	len=strlen(str);
-
-	for(size_t i = 0; i < len-3; i++){
+	for(i = 0; i < len-3; i++){
 		if(atoi(str+i)==code && str[i+3]==' ')
 		return i;
 	}
@@ -181,10 +180,11 @@ void displayProgress(unsigned int currentSize, unsigned int totalSize){
 	//printf("%d\n", ((progresSize - lastProgressSize)));
 
 	printf("\033[A\r[");
-  for(int i = 0; i < progresSize; i++){
+  int i;  
+  for(i = 0; i < progresSize; i++){
     printf("%c", '*');
   }
-  for(int i = progresSize; i < barSize ; i++){
+  for(i = progresSize; i < barSize ; i++){
     printf("%c", '.');
   }
   printf("] %2.2f%%", progress);
