@@ -23,7 +23,7 @@ ping -q -c 1 google.pt  > /dev/null
 zero=0
 
 if [ "$?" -ne "$zero" ]; then
-	echo -n -e "\033[0;31mERROR\033[0m: Could NOT ping a foreign host. Please review! Error "
+	echo -e "\033[0;31mERROR\033[0m: Could NOT ping a foreign host. Please review! Error "
 else
 	echo -e "\033[0;32mSUCCESS\033[0m: Could ping a foreign host, by hostname. Network and DNS are OK."
 fi
