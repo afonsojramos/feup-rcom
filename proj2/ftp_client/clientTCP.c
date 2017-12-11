@@ -71,7 +71,9 @@ char getFizeSizeFrom150(char* buf, size_t* fsize){
 				mult=1000;
 			break;
 			default:
-				// ups, unrecognized multiplier.
+				// ups, unrecognized multiplier.e  function  fread()  reads nmemb items of data, each size bytes long, from the stream pointed to by stream, storing them at the location
+       given by ptr.
+
 				*fsize=0;
 				return -1;
 			break;
@@ -137,7 +139,7 @@ int getReply(int sockfd, char** strRet){
 		// multi-line reply here.
 		code = getCodeFromReply(buf);
 		int wsf=bytes; // written so far
-		if(findCmdSpaceInStr(buf, code)>0){
+		if(findCmdSpaceInStr(buf, code)>=0){
 			if(strRet!=NULL){
 				strncat(*strRet, buf, 2048-wsf);
 				wsf+=bytes;
@@ -150,7 +152,7 @@ int getReply(int sockfd, char** strRet){
 				strncat(*strRet, buf, 2048-wsf);
 				wsf+=bytes;
 			}
-			if(findCmdSpaceInStr(buf, code)>0)
+			if(findCmdSpaceInStr(buf, code)>=0)
 				return code;
 		}
 	}
@@ -267,12 +269,10 @@ char getFileFromFTPServer(parsedURL_t URL)
 	/*get a string from the server*/
 
 	buf = malloc(2048 * sizeof(char));
-	bytes = read(sockfd, buf, 2048);
-	if (getCodeFromReply(buf) == 120)
+	if (getReply(sockfd, NULL) == 120)
 	{
 		// the server is busy. waiting.
-		bytes = read(sockfd, buf, 2048);
-		if (getCodeFromReply(buf) == 220)
+		if (getReply(sockfd, NULL) == 220)
 		{
 			// carry on
 		}
