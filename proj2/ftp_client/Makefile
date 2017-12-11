@@ -1,8 +1,8 @@
 CC=gcc
 CFLAGS=-Wall -Wextra -g
-CFLAGSD=$(CFLAGS) -DDEBUG #debug flags
 
 .PHONY:run
+.PHONY:clean
 
 download: download.o urlParser.o clientTCP.o
 	$(CC) download.o urlParser.o clientTCP.o -o download $(CFLAGS)
