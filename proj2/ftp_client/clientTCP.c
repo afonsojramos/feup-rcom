@@ -71,8 +71,7 @@ char getFizeSizeFrom150(char* buf, size_t* fsize){
 				mult=1000;
 			break;
 			default:
-				// ups, unrecognized multiplier.e  function  fread()  reads nmemb items of data, each size bytes long, from the stream pointed to by stream, storing them at the location
-       given by ptr.
+				// ups, unrecognized multiplier.e  function  fread()  reads nmemb items of data, each size bytes long, from the stream pointed to by stream, storing them at the location given by ptr.
 
 				*fsize=0;
 				return -1;
