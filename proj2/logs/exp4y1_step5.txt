@@ -1,0 +1,54 @@
+tux31:~/Desktop/proj2/tuxes_config# ping 172.16.1.254
+PING 172.16.1.254 (172.16.1.254) 56(84) bytes of data.
+^C
+--- 172.16.1.254 ping statistics ---
+14 packets transmitted, 0 received, 100% packet loss, time 13102ms
+
+tux31:~/Desktop/proj2/tuxes_config# traceroute 172.16.1.254
+traceroute to 172.16.1.254 (172.16.1.254), 30 hops max, 60 byte packets
+ 1  172.16.30.254 (172.16.30.254)  0.318 ms  0.300 ms  0.282 ms
+ 2  172.16.31.254 (172.16.31.254)  0.775 ms  0.760 ms  0.744 ms
+ 3  * * *
+ 4  * * *
+ 5  * * *
+ 6  * * *
+ 7  * * *
+ 8  * * *
+ 9  * * *
+10  * * *
+11  * * *
+12  * * *
+13  * * *
+14  * * *
+15  * * *
+16  * * *
+17  * * *
+18  * * *
+19  * * *
+20  * * *
+21  * * *
+22  *^C
+
+
+notar que o default gateway é seguido até ao router, mas depois deixamos de perceber o que o router faz com o pacote. meter lero-lero sobre nat e coisas.
+
+
+
+
+depois do step 6:
+
+tux31:~/Desktop/proj2/tuxes_config# traceroute 172.16.1.254
+traceroute to 172.16.1.254 (172.16.1.254), 30 hops max, 60 byte packets
+ 1  172.16.30.254 (172.16.30.254)  0.276 ms  0.253 ms  0.233 ms
+ 2  172.16.31.254 (172.16.31.254)  2.090 ms  2.076 ms  2.061 ms
+ 3  firetux.netlab.fe.up.pt (172.16.1.254)  2.863 ms  2.847 ms  2.831 ms
+tux31:~/Desktop/proj2/tuxes_config# ping 172.16.1.254
+PING 172.16.1.254 (172.16.1.254) 56(84) bytes of data.
+64 bytes from 172.16.1.254: icmp_seq=1 ttl=62 time=0.996 ms
+64 bytes from 172.16.1.254: icmp_seq=2 ttl=62 time=0.803 ms
+^C
+--- 172.16.1.254 ping statistics ---
+2 packets transmitted, 2 received, 0% packet loss, time 1001ms
+rtt min/avg/max/mdev = 0.803/0.899/0.996/0.101 ms
+tux31:~/Desktop/proj2/tuxes_config# 
+
