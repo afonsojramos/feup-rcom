@@ -6,7 +6,7 @@ Univeristy Subject - Computer Networks (Redes de Computadores)
 
 2017/2018
 
-With the colaboration of [Afonso Jorge Ramos](https://github.com/AJRamos308) and [Daniel Silva](https://github.com/Dannyps)
+With the colaboration of [Miguel Ramalho](https://github.com/msramalho) and [Daniel Silva](https://github.com/Dannyps)
 
 ## Interesting features
  - Communication Protocol (Data-Link Layer - 2 in OSI Model)
